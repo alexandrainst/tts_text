@@ -1,4 +1,5 @@
 """Module for creating a phoneme covering set from the sorted wiki dataset."""
+import re
 import json
 from pathlib import Path
 
@@ -51,6 +52,27 @@ def make_phoneme_covering_set(cfg: DictConfig) -> None:
             break
 
     covering_set_dataset = Dataset.from_list(covering_set)
+
+    # Extract only the paragraphs that contain example words
+    def extract_paragraph_with_example_word(document: dict) -> dict:
+        document["extracted_text"] = "\n".join(
+            [
+                paragraph
+                for paragraph in re.split(
+                    "_NEWLINE_|_START_ARTICLE_|_START_SECTION_|_START_PARAGRAPH_",
+                    document["text"],
+                )
+                if any(
+                    word in example_words["all"] for word in paragraph.lower().split()
+                )
+            ]
+        )
+        return document
+
+    covering_set_dataset = covering_set_dataset.map(
+        extract_paragraph_with_example_word,
+    )
+
     final_data_path = Path(cfg.dirs.data) / "final"
     if not final_data_path.exists():
         final_data_path.mkdir(parents=True, exist_ok=True)
