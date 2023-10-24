@@ -6,20 +6,6 @@ import random
 
 MINUTES = list(range(0, 60))
 HOURS = list(range(0, 24))
-HOUR_STRINGS = [
-    "Et",
-    "To",
-    "Tre",
-    "Fire",
-    "Fem",
-    "Seks",
-    "Syv",
-    "Otte",
-    "Ni",
-    "Ti",
-    "Elleve",
-    "Tolv",
-]
 HOUR_PREFIXES = [
     "Fem i",
     "Fem over",
@@ -30,6 +16,20 @@ HOUR_PREFIXES = [
     "Tyve i",
     "Tyve over",
     "Halv",
+]
+HOUR_STRINGS = [
+    "et",
+    "to",
+    "tre",
+    "fire",
+    "fem",
+    "seks",
+    "syv",
+    "otte",
+    "ni",
+    "ti",
+    "elleve",
+    "tolv",
 ]
 
 
@@ -44,7 +44,7 @@ def build_time_dataset(output_dir: Path | str) -> list[str]:
     """
     # Build the dataset
     dataset: list[str] = list()
-    dataset.extend([f"{hour}:{minute}" for hour in HOURS for minute in MINUTES])
+    dataset.extend([f"{hour:02}:{minute:02}" for hour in HOURS for minute in MINUTES])
     dataset.extend(
         [
             f"{hour_prefix} {hour_str}"
