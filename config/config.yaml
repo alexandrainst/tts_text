@@ -8,3 +8,6 @@ dirs:
   processed: processed
   final: final
   models: models
+
+phoneme_filename: phonemes.json
+phoneme_sort_strategy: da
