@@ -34,7 +34,7 @@ def build_date_dataset(output_dir: Path | str) -> list[str]:
     # Build the dataset
     dataset: list[str] = list()
     dataset.extend(
-        [f"{day} {month}, {year}" for day in DAYS for month in MONTHS for year in YEARS]
+        [f"{day} {month} {year}" for day in DAYS for month in MONTHS for year in YEARS]
     )
     dataset.extend([f"{day} {month}" for day in DAYS for month in MONTHS])
     random.shuffle(dataset)
