@@ -1,5 +1,6 @@
 """Building a list of Danish times."""
 
+from pathlib import Path
 import random
 
 
@@ -32,12 +33,16 @@ HOUR_PREFIXES = [
 ]
 
 
-def build_time_dataset() -> list[str]:
+def build_time_dataset(output_dir: Path | str) -> list[str]:
     """Build the time dataset.
+
+    Args:
+        output_dir: The directory to save the dataset to.
 
     Returns:
         A list of strings representing times in Danish.
     """
+    # Build the dataset
     dataset: list[str] = list()
     dataset.extend([f"{hour}:{minute}" for hour in HOURS for minute in MINUTES])
     dataset.extend(
@@ -48,4 +53,10 @@ def build_time_dataset() -> list[str]:
         ]
     )
     random.shuffle(dataset)
+
+    # Save the dataset
+    dataset_path = Path(output_dir) / "times.txt"
+    with dataset_path.open("w") as f:
+        f.write("\n".join(dataset))
+
     return dataset
