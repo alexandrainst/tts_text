@@ -3,6 +3,8 @@
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
@@ -18,7 +20,9 @@ def get_raw_html_of_bus_stops_and_stations() -> str:
     # Set up the driver
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Firefox(options=options)
+    gecko_driver_manager = GeckoDriverManager().install()
+    service = Service(executable_path=gecko_driver_manager)
+    driver = webdriver.Firefox(service=service, options=options)
 
     # Get the page and return the raw HTML
     driver.get("https://danskejernbaner.dk/vis.stations.oversigt.php")
