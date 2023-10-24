@@ -152,7 +152,7 @@ test:  ## Run tests
 
 docker:  ## Build Docker image and run container
 	@docker build -t tts_text .
-	@docker run -it --rm tts_text
+	@docker run -it --rm -v data:/project/data tts_text
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
