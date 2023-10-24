@@ -14,6 +14,7 @@ ______________________________________________________________________
 Developers:
 
 - Anders Jess Pedersen (anders.j.pedersen@alexandra.dk)
+- Dan Saattrup Nielsen (dan.nielsen@alexandra.dk)
 
 
 ## Setup
