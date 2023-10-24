@@ -39,7 +39,7 @@ def main(config: DictConfig) -> None:
 
     # Save the dataset
     dataset_path = Path(config.dirs.data) / config.dirs.processed / "dataset.txt"
-    dataset_path.unlink()
+    dataset_path.unlink(missing_ok=True)
     with dataset_path.open("a") as f:
         for sample in dataset_itr:
             f.write(sample + "\n")
