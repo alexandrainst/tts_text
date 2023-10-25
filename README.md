@@ -7,7 +7,7 @@ ______________________________________________________________________
 [![Documentation](https://img.shields.io/badge/docs-passing-green)](https://alexandrainst.github.io/tts_text/tts_text.html)
 [![License](https://img.shields.io/github/license/alexandrainst/tts_text)](https://github.com/alexandrainst/tts_text/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/alexandrainst/tts_text)](https://github.com/alexandrainst/tts_text/commits/main)
-[![Code Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)](https://github.com/alexandrainst/tts_text/tree/main/tests)
+[![Code Coverage](https://img.shields.io/badge/Coverage-47%25-orange.svg)](https://github.com/alexandrainst/tts_text/tree/main/tests)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](https://github.com/alexandrainst/tts_text/blob/main/CODE_OF_CONDUCT.md)
 
 
@@ -17,99 +17,26 @@ Developers:
 - Dan Saattrup Nielsen (dan.nielsen@alexandra.dk)
 
 
-## Setup
+## Quick Start
 
-### Installation
+The quickest way to build the dataset is using Docker. With Docker installed, simply
+write `make docker` and the final dataset will be built in the `data/processed`
+directory, with the individual datasets in `data/raw`.
 
-1. Run `make install`, which installs Poetry (if it isn't already installed), sets up a virtual environment and all Python dependencies therein.
+
+## Development Setup
+
+To install the project for further development, run the following steps:
+
+1. Run `make install`, which installs Poetry (if it isn't already installed), sets up a
+   virtual environment and all Python dependencies therein.
 2. Run `source .venv/bin/activate` to activate the virtual environment.
 
-### Adding and Removing Packages
-
-To install new PyPI packages, run:
+With the project installed, you can build the dataset by running:
 
 ```
-poetry add <package-name>
+python src/scripts/build_tts_dataset.py
 ```
-
-To remove them again, run:
-```
-poetry remove <package-name>
-```
-
-To show all installed packages, run:
-```
-poetry show
-```
-
-
-## A Word on Modules and Scripts
-In the `src` directory there are two subdirectories, `tts_text`
-and `scripts`. This is a brief explanation of the differences between the two.
-
-### Modules
-All Python files in the `tts_text` directory are _modules_
-internal to the project package. Examples here could be a general data loading script,
-a definition of a model, or a training function. Think of modules as all the building
-blocks of a project.
-
-When a module is importing functions/classes from other modules we use the _relative
-import_ notation - here's an example:
-
-```
-from .other_module import some_function
-```
-
-### Scripts
-Python files in the `scripts` folder are scripts, which are short code snippets that
-are _external_ to the project package, and which is meant to actually run the code. As
-such, _only_ scripts will be called from the terminal. An analogy here is that the
-internal `numpy` code are all modules, but the Python code you write where you import
-some `numpy` functions and actually run them, that a script.
-
-When importing module functions/classes when you're in a script, you do it like you
-would normally import from any other package:
-
-```
-from tts_text import some_function
-```
-
-Note that this is also how we import functions/classes in tests, since each test Python
-file is also a Python script, rather than a module.
-
-
-## Features
-
-### Docker Setup
-
-A Dockerfile is included in the new repositories, which by default runs
-`src/scripts/your_script.py`. You can build the Docker image and run the Docker
-container by running `make docker`.
-
-### Automatic Documentation
-
-Run `make docs` to create the documentation in the `docs` folder, which is based on
-your docstrings in your code. You can view this by running `make view-docs`.
-
-### Automatic Test Coverage Calculation
-
-Run `make test` to test your code, which also updates the "coverage badge" in the
-README, showing you how much of your code base that is currently being tested.
-
-### Continuous Integration
-
-Github CI pipelines are included in the repo, running all the tests in the `tests`
-directory, as well as building online documentation, if Github Pages has been enabled
-for the repository (can be enabled on Github in the repository settings).
-
-### Code Spaces
-
-Code Spaces is a new feature on Github, that allows you to develop on a project
-completely in the cloud, without having to do any local setup at all. This repo comes
-included with a configuration file for running code spaces on Github. When hosted on
-`alexandrainst/tts_text` then simply press the `<> Code` button
-and add a code space to get started, which will open a VSCode window directly in your
-browser.
 
 
 ## Project structure
@@ -123,6 +50,7 @@ browser.
 │       └── docs.yaml
 ├── .gitignore
 ├── .pre-commit-config.yaml
+├── .ruff_cache
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── Dockerfile
@@ -151,16 +79,22 @@ browser.
 │   └── .gitkeep
 ├── notebooks
 │   └── .gitkeep
+├── poetry.lock
 ├── poetry.toml
 ├── pyproject.toml
 ├── src
 │   ├── scripts
-│   │   ├── fix_dot_env_file.py
-│   │   └── your_script.py
+│   │   ├── build_tts_dataset.py
+│   │   └── fix_dot_env_file.py
 │   └── tts_text
 │       ├── __init__.py
-│       └── your_module.py
+│       ├── __pycache__
+│       ├── bus_stops_and_stations.py
+│       ├── dates.py
+│       ├── times.py
+│       └── utils.py
 └── tests
     ├── __init__.py
+    ├── __pycache__
     └── test_dummy.py
 ```
