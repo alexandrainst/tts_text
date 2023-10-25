@@ -7,9 +7,6 @@ RUN pip install "poetry==1.5.1"
 WORKDIR /project
 COPY . /project
 
-# Install firefox
-RUN apt-get update && apt-get install -y firefox-esr
-
 # Install dependencies
 RUN poetry env use python3.11
 RUN poetry install --no-interaction --no-cache --without dev
