@@ -102,6 +102,7 @@ docs/search.js
 # Data
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/list_of_foreign_phonemes.pdf
 data/processed/*
 !data/processed/.gitkeep
 data/final/*
