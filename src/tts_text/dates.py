@@ -19,7 +19,7 @@ MONTHS = [
     "November",
     "December",
 ]
-YEARS = [year for year in range(2000, 2030)]
+YEARS = [year for year in range(1970, 2030)]
 
 
 def build_date_dataset(output_dir: Path | str) -> list[str]:
