@@ -50,7 +50,6 @@ python src/scripts/build_tts_dataset.py
 │       └── docs.yaml
 ├── .gitignore
 ├── .pre-commit-config.yaml
-├── .ruff_cache
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── Dockerfile
