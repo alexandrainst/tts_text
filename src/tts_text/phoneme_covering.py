@@ -136,14 +136,14 @@ def build_phoneme_covering_dataset(
         if not all_phone_names:
             break
         document_phonemes = document["all_phonemes"]
-        new_phonemes = set(document_phonemes).difference(all_phone_names)
+        new_phonemes = set(all_phone_names).intersection(document_phonemes)
         for new_phoneme in new_phonemes:
             all_phone_names.remove(new_phoneme)
         if new_phonemes:
             covering_set.append(document)
 
     covering_set_dataset = Dataset.from_list(covering_set)
-    example_words = get_example_words(phonemes=phonemes)
+    get_example_words(phonemes=phonemes)
 
     def extract_paragraph_with_example_word(document: dict) -> dict:
         found_paragraphs = []
@@ -151,7 +151,10 @@ def build_phoneme_covering_dataset(
             "\t|\n|_NEWLINE_|_START_ARTICLE_|_START_SECTION_|_START_PARAGRAPH_",
             document["text"],
         ):
-            if any(word in example_words["all"] for word in paragraph.split()):
+            if any(
+                word in document["all_found_example_words"]
+                for word in paragraph.split()
+            ):
                 found_paragraphs.append(paragraph)
 
         document["extracted_text"] = " ".join(found_paragraphs)
