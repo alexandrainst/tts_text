@@ -135,7 +135,7 @@ def make_phoneme_covering_set(cfg: DictConfig, output_path: Path) -> list[str]:
     ]
 
     covering_set = []
-    for document in tqdm(sorted_dataset):
+    for document in tqdm(sorted_dataset, desc="Building a phoneme covering set"):
         document_phonemes = document["all_phonemes"]
         new_phoneme_found = False
         for phoneme in document_phonemes:
