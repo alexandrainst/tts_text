@@ -55,7 +55,7 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
     return dataset
 
 
-def count_phoneme_occurences(cfg: DictConfig, document: dict, phonemes: dict) -> dict:
+def count_phoneme_occurences(document: dict, phonemes: dict, cfg: DictConfig) -> dict:
     """Count the occurences of phonemes in a document.
 
     Args:
