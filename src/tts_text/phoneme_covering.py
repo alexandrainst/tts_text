@@ -144,7 +144,6 @@ def build_phoneme_covering_dataset(
             covering_set.append(document)
 
     covering_set_dataset = Dataset.from_list(covering_set)
-    get_example_words(phonemes=phonemes)
 
     def extract_paragraph_with_example_word(document: dict) -> dict:
         found_paragraphs = []
