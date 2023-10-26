@@ -62,11 +62,11 @@ def count_occurences(document: dict, phonemes: dict) -> dict:
     """Count the occurences of phonemes in a document.
 
     Args:
-        document (dict): The document to count phonemes in.
-        phonemes (dict): The phonemes to count.
+        document: The document to count phonemes in.
+        phonemes: The phonemes to count.
 
     Returns:
-        dict: The document with phoneme lists and counts added.
+        The document with phoneme lists and counts added.
     """
     # Clean document text, wiki articles have special annotations of sections and
     # paragraphs, etc.
