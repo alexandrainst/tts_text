@@ -5,7 +5,7 @@ import re
 import logging
 from collections import Counter
 from pathlib import Path
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from datasets import load_dataset, Dataset
 from omegaconf import DictConfig
