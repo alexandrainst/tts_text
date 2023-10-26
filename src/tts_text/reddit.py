@@ -1,4 +1,4 @@
-"""Building a list of open Lex.dk articles."""
+"""Building a list of reddit comments."""
 
 from datasets import Dataset, load_dataset
 from pathlib import Path
@@ -13,15 +13,15 @@ nltk.download("punkt", quiet=True)
 
 
 def build_reddit_dataset(output_dir: Path | str) -> list[str]:
-    """Build the Lex.dk dataset.
+    """Build the reddit.com dataset.
 
     Args:
         output_dir: The directory to save the dataset to.
 
     Returns:
-        A list of articles from Lex.dk.
+        A list of reddit.com comments.
     """
-    # Load the articles
+    # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
     assert isinstance(raw_dataset, Dataset)
     filtered_dataset = raw_dataset.filter(
@@ -29,12 +29,12 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
         and example["language_confidence"] > 0.95,
         keep_in_memory=True,
     )
-    articles = filtered_dataset["doc"]
+    comments = filtered_dataset["doc"]
 
-    # Split the articles into sentences
+    # Split the comments into sentences
     dataset = list(
         it.chain(
-            *[sent_tokenize(text=article, language="danish") for article in articles]
+            *[sent_tokenize(text=article, language="danish") for article in comments]
         )
     )
 
