@@ -12,4 +12,4 @@ RUN poetry env use python3.11
 RUN poetry install --no-interaction --no-cache --without dev
 
 # Run the script
-CMD poetry run python src/scripts/your_script.py
+CMD poetry run python src/scripts/build_tts_dataset.py
