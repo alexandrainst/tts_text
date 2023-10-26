@@ -17,7 +17,7 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
     """Sort the wiki dataset by phoneme occurence.
 
     Args:
-        cfg (DictConfig): cfg: The Hydra configuration object.
+        cfg: The Hydra configuration object.
 
     Returns:
         Dataset: The sorted dataset.
