@@ -1,4 +1,5 @@
 """Module for creating a phoneme covering set."""
+
 import json
 import re
 import logging
