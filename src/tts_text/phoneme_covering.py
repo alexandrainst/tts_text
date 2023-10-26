@@ -36,8 +36,8 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         beam_runner="DirectRunner",
     )
 
-    phoneme_dir = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
-    with phoneme_dir.open() as f:
+    phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
+    with phoneme_path.open() as f:
         phonemes = json.load(f)
 
     # Count phonemes in articles
