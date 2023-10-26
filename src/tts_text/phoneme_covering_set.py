@@ -148,7 +148,7 @@ def make_phoneme_covering_set(cfg: DictConfig, output_path: Path) -> list[str]:
             break
 
     covering_set_dataset = Dataset.from_list(covering_set)
-    example_words = get_example_words(phonemes)
+    example_words = get_example_words(phonemes=phonemes)
 
     # Extract only the paragraphs that contain example words
     def extract_paragraph_with_example_word(document: dict) -> dict:
