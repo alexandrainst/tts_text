@@ -1,0 +1,105 @@
+"""Script for manually filtering a list of reddit comments."""
+
+import pandas as pd
+from datasets import Dataset, load_dataset
+import nltk
+import click
+from pathlib import Path
+from nltk.tokenize import sent_tokenize
+import itertools as it
+import re
+
+
+# Download the sentence splitter model
+nltk.download("punkt", quiet=True)
+
+
+@click.command("Starts the process of manually filter reddit comments.")
+@click.option("--output-dir", type=Path, required=True)
+@click.option("--n", type=int, default=1000)
+@click.option("--start-index", type=int, default=0)
+@click.option("--username", type=str, required=True)
+def filter_reddit_dataset(
+    output_dir: Path | str, username: str, n: int = 1000, start_index: int = 0
+):
+    """Script for manually filtering a list of reddit comments.
+
+    Args:
+        output_dir: The directory to save the dataset to.
+        username: The username of the person filtering the dataset.
+        n: The number of sentences to manually filter.
+        start_index: The index to start from.
+    """
+    # Load the comments
+    raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
+    assert isinstance(raw_dataset, Dataset)
+    filtered_dataset = raw_dataset.filter(
+        lambda example: example["lang"] == "da"
+        and example["language_confidence"] > 0.95,
+        keep_in_memory=True,
+    )
+    comments = filtered_dataset["doc"]
+
+    # Split the comments into sentences
+    dataset = list(
+        it.chain(
+            *[sent_tokenize(text=article, language="danish") for article in comments]
+        )
+    )
+
+    # Remove newlines
+    dataset = [sentence.replace("\n", " ") for sentence in dataset]
+
+    # Remove too short sentences
+    dataset = [sentence for sentence in dataset if len(sentence) > 10]
+
+    # Remove sentences ending in "..."
+    dataset = [sentence for sentence in dataset if not sentence.endswith("...")]
+
+    # Remove sentences ending in an abbreviation
+    dataset = [
+        sentence
+        for sentence in dataset
+        if re.search(r"\.[A-ZÆØÅa-zæøå]+\.$", sentence) is None
+    ]
+
+    # Remove sentences with urls
+    dataset = [
+        sentence
+        for sentence in dataset
+        if re.search(r"https?://[^\s]+", sentence) is None
+    ]
+
+    # Manually filter the dataset, and store which person filtered each comment
+    records: list[dict[str, str | int]] = list()
+    for index, sentence in enumerate(dataset[start_index : start_index + n]):
+        print(sentence)
+        answer = input("Keep? [y/n]: ")
+        while answer not in ["y", "n"]:
+            if answer in ["y", "n"]:
+                records.append(
+                    {
+                        "sentence": sentence,
+                        "username": username,
+                        "keep": answer,
+                        "index": start_index + index,
+                    }
+                )
+            else:
+                print("Invalid input, must be 'y' or 'n'.")
+                answer = input("Keep? [y/n]: ")
+    filtered_answers = pd.DataFrame.from_records(records)
+
+    # Load the previous answers, if any exist
+    previous_answers_path = Path(output_dir) / "filtered_answers.csv"
+    if previous_answers_path.exists():
+        previous_answers = pd.read_csv(previous_answers_path)
+        if not previous_answers.equals(filtered_answers):
+            # Merge the previous answers with the new answers, but only the ones that
+            # have recieved a "y" answer from both annotators.
+            concatenated_answers = pd.concat([previous_answers, filtered_answers])
+            filtered_answers = concatenated_answers.groupby(
+                ["sentence", "index"], as_index=False, sort=False
+            ).agg({"username": ", ".join, "Result": lambda x: (x == "y").sum() == 2})
+
+    filtered_answers.to_csv(Path(output_dir) / "filtered_answers.csv", index=False)
