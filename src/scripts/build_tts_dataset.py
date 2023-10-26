@@ -3,6 +3,7 @@
 from tts_text import ALL_DATASET_BUILDERS
 from tts_text.utils import interleave_datasets
 import hydra
+from collections import defaultdict
 from omegaconf import DictConfig
 from pathlib import Path
 import logging
@@ -23,10 +24,12 @@ def main(config: DictConfig) -> None:
     """
     # Get the individual datasets
     raw_dir = Path(config.dirs.data) / config.dirs.raw
-    datasets = {
-        name: builder(output_dir=raw_dir)
-        for name, builder in ALL_DATASET_BUILDERS.items()
-    }
+    datasets: dict[str, list[str]] = defaultdict()
+    for name, builder in ALL_DATASET_BUILDERS.items():
+        try:
+            datasets[name] = builder(output_dir=raw_dir)
+        except TypeError:
+            datasets[name] = builder(cfg=config, output_dir=raw_dir)
 
     # Ensure that the sampling probabilities include all the datasets
     if set(config.sampling_probabilities.keys()) != set(datasets.keys()):
