@@ -1,8 +1,6 @@
 """Build the Danish text-to-speech dataset."""
 
-from tts_text.dates import build_date_dataset
-from tts_text.times import build_time_dataset
-from tts_text.bus_stops_and_stations import build_bus_stop_and_station_dataset
+from tts_text import ALL_DATASET_BUILDERS
 from tts_text.utils import interleave_datasets
 import hydra
 from omegaconf import DictConfig
@@ -19,21 +17,29 @@ def main(config: DictConfig) -> None:
 
     Args:
         config: The Hydra configuration.
+
+    Raises:
+        ValueError: If the sampling probabilities do not include all the datasets.
     """
     # Get the individual datasets
     raw_dir = Path(config.dirs.data) / config.dirs.raw
-    date_dataset = build_date_dataset(output_dir=raw_dir)
-    time_dataset = build_time_dataset(output_dir=raw_dir)
-    bus_stops_and_stations = build_bus_stop_and_station_dataset(output_dir=raw_dir)
+    datasets = {
+        name: builder(output_dir=raw_dir)
+        for name, builder in ALL_DATASET_BUILDERS.items()
+    }
+
+    # Ensure that the sampling probabilities include all the datasets
+    if set(config.sampling_probabilities.keys()) != set(datasets.keys()):
+        raise ValueError(
+            "The sampling probabilities must include all the datasets. Was missing "
+            f"{set(datasets.keys()) - set(config.sampling_probabilities.keys())}."
+        )
 
     # Combine the datasets
-    sampling_probabilities = config.sampling_probabilities
     dataset_itr = interleave_datasets(
-        datasets=[date_dataset, time_dataset, bus_stops_and_stations],
+        datasets=list(datasets.values()),
         sampling_probabilities=[
-            sampling_probabilities.dates,
-            sampling_probabilities.times,
-            sampling_probabilities.bus_stops_and_stations,
+            config.sampling_probabilities[name] for name in datasets.keys()
         ],
     )
 
