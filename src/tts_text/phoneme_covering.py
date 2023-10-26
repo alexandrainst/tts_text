@@ -3,6 +3,7 @@
 import json
 import re
 import logging
+from functools import partial
 from collections import Counter
 from pathlib import Path
 from tqdm.auto import tqdm
@@ -39,9 +40,7 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         phonemes = json.load(f)
 
     # Count phonemes in articles
-    dataset = dataset.map(
-        lambda x: count_occurences(x, phonemes),
-    )
+    dataset = dataset.map(partial(count_occurences, phonemes=phonemes))
     sort_by = cfg.phoneme_sort_strategy
     if sort_by == "da":
         dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
