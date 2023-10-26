@@ -8,7 +8,7 @@ dirs:
   processed: processed
   final: final
   models: models
-  phoneme_dir: config/phonemes.json
+  phoneme_file: phonemes.json
 
 
 phoneme_sort_strategy: da

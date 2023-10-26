@@ -34,7 +34,8 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         beam_runner="DirectRunner",
     )
 
-    with Path(cfg.dirs.phoneme_dir).open() as f:
+    phoneme_dir = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
+    with phoneme_dir.open() as f:
         phonemes = json.load(f)
 
     # Count phonemes in articles
@@ -125,8 +126,8 @@ def build_phoneme_covering_dataset(
     """
     sorted_dataset = sort_wiki_by_phoneme_occurence(cfg=cfg)
 
-    phoneme_path = Path(cfg.dirs.phoneme_dir)
-    with phoneme_path.open() as f:
+    phoneme_dir = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
+    with phoneme_dir.open() as f:
         phonemes = json.load(f)
     all_phone_names = {entry["name"] for entry in phonemes["da"]}.union(
         {entry["name"] for entry in phonemes["en"]}
