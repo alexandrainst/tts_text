@@ -112,7 +112,7 @@ def count_occurences(document: dict, phonemes: dict) -> dict:
     return document
 
 
-def make_phoneme_covering_set(cfg: DictConfig, output_path: Path) -> list[str]:
+def build_phoneme_covering_dataset(cfg: DictConfig, output_path: Path) -> list[str]:
     """Create a phoneme covering set from the sorted wiki dataset.
 
     A phoneme covering set is a set of strings that contains at least one example
