@@ -14,8 +14,8 @@ from omegaconf import DictConfig
 logger = logging.getLogger(__name__)
 
 
-def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
-    """Sort the wiki dataset by phoneme occurence.
+def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
+    """Load and sort the wiki dataset by phoneme occurence.
 
     Args:
         cfg: The Hydra configuration object.
@@ -24,7 +24,8 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         The sorted dataset.
 
     Raises:
-        ValueError: If sort_by is not one of "da", "en" or "all".
+        ValueError: If `phoneme_sort_strategy` in the config is not one of "da", "en"
+            or "all".
     """
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
@@ -40,7 +41,7 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         phonemes = json.load(f)
 
     # Count phonemes in articles
-    dataset = dataset.map(partial(count_occurences, phonemes=phonemes))
+    dataset = dataset.map(partial(count_phoneme_occurences, phonemes=phonemes))
     sort_by = cfg.phoneme_sort_strategy
     if sort_by == "da":
         dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
@@ -54,7 +55,7 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
     return dataset
 
 
-def count_occurences(document: dict, phonemes: dict) -> dict:
+def count_phoneme_occurences(document: dict, phonemes: dict) -> dict:
     """Count the occurences of phonemes in a document.
 
     Args:
@@ -123,7 +124,7 @@ def build_phoneme_covering_dataset(
     Returns:
         The phoneme covering set.
     """
-    sorted_dataset = sort_wiki_by_phoneme_occurence(cfg=cfg)
+    sorted_dataset = load_and_wiki_by_phoneme_occurence(cfg=cfg)
 
     phoneme_dir = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
     with phoneme_dir.open() as f:
