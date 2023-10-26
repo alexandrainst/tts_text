@@ -128,7 +128,7 @@ def make_phoneme_covering_set(cfg: DictConfig, output_path: Path) -> list[str]:
 
     raw_data_path = Path(cfg.dirs.data) / "raw"
     phoneme_path = raw_data_path / cfg.phoneme_filename
-    with open(phoneme_path) as f:
+    with phoneme_path.open() as f:
         phonemes = json.load(f)
     all_phone_names = [entry["name"] for entry in phonemes["da"]] + [
         entry["name"] for entry in phonemes["en"]
