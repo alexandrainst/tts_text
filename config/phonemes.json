@@ -1,0 +1,325 @@
+{
+    "da": [
+        {
+            "name": "æ",
+            "examples": ["ae"]
+        },
+        {
+            "name": "a",
+            "examples": ["and"]
+        },
+        {
+            "name": "ar",
+            "examples": ["ar"]
+        },
+        {
+            "name": "e",
+            "examples": ["elefant"]
+        },
+        {
+            "name": "i",
+            "examples": ["ih"] 
+        },
+        {
+            "name": "o",
+            "examples": ["Ole"]
+        },
+        {
+            "name": "u",
+            "examples": ["ugle"]
+        },
+        {
+            "name": "w",
+            "examples": ["havet"]
+        },
+        {
+            "name": "y",
+            "examples": ["hyl"]
+        },
+        {
+            "name": "ææ",
+            "examples": ["æble"]
+        },
+        {
+            "name": "ø",
+            "examples": ["ø"]
+        },
+        {
+            "name": "øø",
+            "examples": ["høne"]
+        },
+        {
+            "name": "øøø",
+            "examples": ["drøn"]
+        },
+        {
+            "name": "å",
+            "examples": ["å"]
+        },
+        {
+            "name": "åå",
+            "examples": ["åre"]
+        },
+        {
+            "name": "oo",
+            "examples": ["Oliver"]
+        },
+        {
+            "name": "ɑ",
+            "examples": ["ar"]
+        },
+        {
+            "name": "b",
+            "examples": ["boble"]
+        },
+        {
+            "name": "d",
+            "examples": ["dut"]
+        },
+        {
+            "name": "dd",
+            "examples": ["mad"]
+        },
+        {
+            "name": "f",
+            "examples": ["fut"]
+        },
+        {
+            "name": "g",
+            "examples": ["gok"]
+        },
+        {
+            "name": "h",
+            "examples": ["hund"]
+        },
+        {
+            "name": "j",
+            "examples": ["jordbær"]
+        },
+        {
+            "name": "k",
+            "examples": ["kukkeur"]
+        },
+        {
+            "name": "l",
+            "examples": ["lalala"]
+        },
+        {
+            "name": "m",
+            "examples": ["mave"]
+        },
+        {
+            "name": "n",
+            "examples": ["næse"]
+        },
+        {
+            "name": "nn",
+            "examples": ["gynge"]
+        },
+        {
+            "name": "p",
+            "examples": ["puste"]
+        },
+        {
+            "name": "r",
+            "examples": ["ræv"]
+        },
+        {
+            "name": "s",
+            "examples": ["slange"]
+        },
+        {
+            "name": "ss",
+            "examples": ["shh"]
+        },
+        {
+            "name": "t",
+            "examples": ["tromme"]
+        },
+        {
+            "name": "v",
+            "examples": ["våd"]
+        }
+    ],
+    "en":
+    [
+        {
+            "name": "b",
+            "examples": ["bug", "bubble"]
+        },
+        {
+            "name": "d",
+            "examples": ["dad", "add", "milled"]
+        },
+        {
+            "name": "f",
+            "examples": ["fat", "cliff", "phone", "enough", "half", "often"]
+        },
+        {
+            "name": "g",
+            "examples": ["gun", "egg", "ghost", "guest", "prologue"]
+        },
+        {
+            "name": "h",
+            "examples": ["who"]
+        },
+        {
+            "name": "d",
+            "examples": ["jam", "wage", "giraffe", "edge", "soldier", "exaggerate"]
+        },
+        {
+            "name": "k",
+            "examples": ["kit", "cat", "chris", "accent", "folk", "bouquet", "queen", "rack", "box"]
+        },
+        {
+            "name": "l",
+            "examples": ["live", "well"]
+        },
+        {
+            "name": "m",
+            "examples": ["man", "summer", "comb", "column", "palm"]
+        },
+        {
+            "name": "n",
+            "examples": ["net", "funny", "know", "gnat", "pneumonic", "mnemonic"]
+        },
+        {
+            "name": "p",
+            "examples": ["pin", "dippy"]
+        },
+        {
+            "name": "r",
+            "examples": ["run", "carrot", "wrench", "rhyme"]
+        },
+        {
+            "name": "s",
+            "examples": ["sit", "less", "circle", "scene", "psycho", "listen", "pace", "course"]
+        },
+        {
+            "name": "t",
+            "examples": ["tip", "matter", "thomas", "ripped"]
+        },
+        {
+            "name": "v",
+            "examples": ["vine", "of", "stephen", "five"]
+        },
+        {
+            "name": "w",
+            "examples": ["wit", "why", "quick", "choir"]
+        },
+        {
+            "name": "z",
+            "examples": ["zed", "buzz", "his", "scissors", "xylophone", "craze"]
+        },
+        {
+            "name": "ʒ",
+            "examples": ["treasure", "division", "azure"]
+        },
+        {
+            "name": "t",
+            "examples": ["chip", "watch", "future", "righteous"]
+        },
+        {
+            "name": "ʃ",
+            "examples": ["sham", "ocean", "sure", "special", "pension", "machine", "conscience", "station"]
+        },
+        {
+            "name": "θ",
+            "examples": ["thongs"]
+        },
+        {
+            "name": "ð",
+            "examples": ["leather"]
+        },
+        {
+            "name": "ŋ",
+            "examples": ["ring", "pink", "tongue"]
+        },
+        {
+            "name": "j",
+            "examples": ["you", "onion", "hallelujah"]
+        },
+        {
+            "name": "æ",
+            "examples": ["plaid", "laugh"]
+        },
+        {
+            "name": "eɪ",
+            "examples": ["bay", "maid", "weigh", "straight", "pay", "foyer", "filet", "eight", "gauge", "mate", "break", "they"]
+        },
+        {
+            "name": "ɛ",
+            "examples": ["end", "bread", "bury", "friend", "said", "many", "leopard", "heifer", "aesthetic"]
+        },
+        {
+            "name": "i:",
+            "examples": ["be", "bee", "meat", "lady", "key", "phoenix", "grief", "ski", "deceive", "people", "quay"]
+        },
+        {
+            "name": "ɪ",
+            "examples": ["it", "england", "women", "busy", "guild", "gym", "sieve"]
+        },
+        {
+            "name": "aɪ",
+            "examples": ["spider", "sky", "night", "pie", "guy", "stye", "aisle", "island", "height", "kite"]
+        },
+        {
+            "name": "ɒ",
+            "examples": ["swan", "honest", "maul", "slaw", "fought"]
+        },
+        {
+            "name": "oʊ",
+            "examples": ["open", "moat", "bone", "toe", "sow", "dough", "beau", "brooch", "sew"]
+        },
+        {
+            "name": "ʊ",
+            "examples": ["wolf", "look", "bush", "would"]
+        },
+        {
+            "name": "ʌ",
+            "examples": ["monkey", "blood", "double"]
+        },
+        {
+            "name": "u:",
+            "examples": ["who", "loon", "dew", "blue", "flute", "shoe", "through", "fruit", "manoeuvre", "group"]
+        },
+        {
+            "name": "ɔɪ",
+            "examples": ["join", "boy", "buoy"]
+        },
+        {
+            "name": "aʊ",
+            "examples": ["now", "shout", "bough"]
+        },
+        {
+            "name": "ə",
+            "examples": ["about", "ladder", "pencil", "dollar", "honour", "augur"]
+        },
+        {
+            "name": "eəʳ",
+            "examples": ["chair", "dare", "pear", "where", "their", "prayer"]
+        },
+        {
+            "name": "ɑ:",
+            "examples": ["arm"]
+        },
+        {
+            "name": "ɜ:ʳ",
+            "examples": ["bird", "term", "burn", "pearl", "word", "journey", "myrtle"]
+        },
+        {
+            "name": "ɔ:",
+            "examples": ["paw", "ball", "fork", "poor", "fore", "board", "four", "taught", "war", "bought", "sauce"]
+        },
+        {
+            "name": "ɪəʳ",
+            "examples": ["ear", "steer", "here", "tier"]
+        },
+        {
+            "name": "ʊəʳ",
+            "examples": ["cure", "tourist"]
+        }
+    ]
+}
+
+

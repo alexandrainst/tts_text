@@ -8,8 +8,9 @@ dirs:
   processed: processed
   final: final
   models: models
+  phoneme_dir: config/phonemes.json
 
-phoneme_filename: phonemes.json
+
 phoneme_sort_strategy: da
 sampling_probabilities:
   dates: 0.0625

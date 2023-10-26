@@ -25,10 +25,6 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
     Raises:
         ValueError: If sort_by is not one of "da", "en" or "all".
     """
-    raw_data_path = Path(cfg.dirs.data) / "raw"
-    if not raw_data_path.exists():
-        raw_data_path.mkdir(parents=True, exist_ok=True)
-
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
     dataset = load_dataset(
@@ -38,7 +34,7 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         beam_runner="DirectRunner",
     )
 
-    with open(raw_data_path / cfg.phoneme_filename) as f:
+    with Path(cfg.dirs.phoneme_dir).open() as f:
         phonemes = json.load(f)
 
     # Count phonemes in articles
@@ -112,7 +108,9 @@ def count_occurences(document: dict, phonemes: dict) -> dict:
     return document
 
 
-def build_phoneme_covering_dataset(cfg: DictConfig, output_path: Path) -> list[str]:
+def build_phoneme_covering_dataset(
+    cfg: DictConfig, output_dir: Path | str
+) -> list[str]:
     """Create a phoneme covering set from the sorted wiki dataset.
 
     A phoneme covering set is a set of strings that contains at least one example
@@ -120,14 +118,14 @@ def build_phoneme_covering_dataset(cfg: DictConfig, output_path: Path) -> list[s
 
     Args:
         cfg: The Hydra configuration object.
+        output_dir: The directory to save the dataset to.
 
     Returns:
         The phoneme covering set.
     """
     sorted_dataset = sort_wiki_by_phoneme_occurence(cfg=cfg)
 
-    raw_data_path = Path(cfg.dirs.data) / "raw"
-    phoneme_path = raw_data_path / cfg.phoneme_filename
+    phoneme_path = Path(cfg.dirs.phoneme_dir)
     with phoneme_path.open() as f:
         phonemes = json.load(f)
     all_phone_names = {entry["name"] for entry in phonemes["da"]}.union(
@@ -163,7 +161,7 @@ def build_phoneme_covering_dataset(cfg: DictConfig, output_path: Path) -> list[s
         extract_paragraph_with_example_word,
     )
     dataset = [document["extracted_text"] for document in covering_set_dataset]
-    dataset_path = Path(output_path) / "phoneme_covering_set.txt"
+    dataset_path = Path(output_dir) / "phoneme_covering_set.txt"
     with dataset_path.open("w") as f:
         f.write("\n".join(dataset))
 
