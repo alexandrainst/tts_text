@@ -59,9 +59,9 @@ def count_phoneme_occurences(document: dict, phonemes: dict, cfg: DictConfig) ->
     """Count the occurences of phonemes in a document.
 
     Args:
-        cfg: The Hydra configuration object.
         document: The document to count phonemes in.
         phonemes: The phonemes to count.
+        cfg: The Hydra configuration object.
 
     Returns:
         The document with phoneme lists and counts added.
