@@ -127,8 +127,8 @@ def build_phoneme_covering_dataset(
     """
     sorted_dataset = load_and_wiki_by_phoneme_occurence(cfg=cfg)
 
-    phoneme_dir = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
-    with phoneme_dir.open() as f:
+    phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
+    with phoneme_path.open() as f:
         phonemes = json.load(f)
     all_phone_names = {entry["name"] for entry in phonemes["da"]}.union(
         {entry["name"] for entry in phonemes["en"]}
