@@ -20,7 +20,7 @@ def sort_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         cfg: The Hydra configuration object.
 
     Returns:
-        Dataset: The sorted dataset.
+        The sorted dataset.
 
     Raises:
         ValueError: If sort_by is not one of "da", "en" or "all".
