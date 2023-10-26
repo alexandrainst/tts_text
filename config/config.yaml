@@ -8,3 +8,8 @@ dirs:
   processed: processed
   final: final
   models: models
+
+sampling_probabilities:
+  dates: 0.25
+  times: 0.25
+  bus_stops_and_stations: 0.5
