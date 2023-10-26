@@ -119,10 +119,10 @@ def make_phoneme_covering_set(cfg: DictConfig, output_path: Path) -> list[str]:
     word for each phoneme.
 
     Args:
-        cfg (DictConfig): The Hydra configuration object.
+        cfg: The Hydra configuration object.
 
     Returns:
-        list[str]: The phoneme covering set.
+        The phoneme covering set.
     """
     sorted_dataset = sort_wiki_by_phoneme_occurence(cfg=cfg)
 
