@@ -177,10 +177,10 @@ def get_example_words(phonemes: dict) -> dict:
     """Get example words from the phonemes dict.
 
     Args:
-        phonemes (dict): The phonemes dict.
+        phonemes: The phonemes dict.
 
     Returns:
-        dict: The example words.
+        The example words.
     """
     # Get example words
     da_phonemes = phonemes["da"]
