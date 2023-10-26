@@ -41,7 +41,7 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         phonemes = json.load(f)
 
     # Count phonemes in articles
-    dataset = dataset.map(partial(count_phoneme_occurences, phonemes=phonemes))
+    dataset = dataset.map(partial(count_phoneme_occurences, phonemes=phonemes, cfg=cfg))
     sort_by = cfg.phoneme_sort_strategy
     if sort_by == "da":
         dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
@@ -55,10 +55,11 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
     return dataset
 
 
-def count_phoneme_occurences(document: dict, phonemes: dict) -> dict:
+def count_phoneme_occurences(cfg: DictConfig, document: dict, phonemes: dict) -> dict:
     """Count the occurences of phonemes in a document.
 
     Args:
+        cfg: The Hydra configuration object.
         document: The document to count phonemes in.
         phonemes: The phonemes to count.
 
@@ -70,7 +71,7 @@ def count_phoneme_occurences(document: dict, phonemes: dict) -> dict:
     document_text = document["text"]
     " ".join(
         re.split(
-            "\t|\n|_NEWLINE_|_START_ARTICLE_|_START_SECTION_|_START_PARAGRAPH_",
+            "|".join(cfg.split_strings),
             document["text"],
         )
     )
@@ -148,7 +149,7 @@ def build_phoneme_covering_dataset(
     def extract_paragraph_with_example_word(document: dict) -> dict:
         found_paragraphs = []
         for paragraph in re.split(
-            "\t|\n|_NEWLINE_|_START_ARTICLE_|_START_SECTION_|_START_PARAGRAPH_",
+            "|".join(cfg.split_strings),
             document["text"],
         ):
             if any(

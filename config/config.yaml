@@ -10,6 +10,13 @@ dirs:
   models: models
   phoneme_file: phonemes.json
 
+split_strings:
+  - \t
+  - \n
+  - _NEWLINE_
+  - _START_ARTICLE_
+  - _START_SECTION_
+  - _START_PARAGRAPH_
 
 phoneme_sort_strategy: da
 sampling_probabilities:
