@@ -130,22 +130,19 @@ def build_phoneme_covering_dataset(cfg: DictConfig, output_path: Path) -> list[s
     phoneme_path = raw_data_path / cfg.phoneme_filename
     with phoneme_path.open() as f:
         phonemes = json.load(f)
-    all_phone_names = [entry["name"] for entry in phonemes["da"]] + [
-        entry["name"] for entry in phonemes["en"]
-    ]
-
+    all_phone_names = {entry["name"] for entry in phonemes["da"]}.union(
+        {entry["name"] for entry in phonemes["en"]}
+    )
     covering_set = []
-    for document in tqdm(sorted_dataset, desc="Building a phoneme covering set"):
-        document_phonemes = document["all_phonemes"]
-        new_phoneme_found = False
-        for phoneme in document_phonemes:
-            if phoneme in all_phone_names:
-                new_phoneme_found = True
-                all_phone_names.pop(all_phone_names.index(phoneme))
-        if new_phoneme_found:
-            covering_set.append(document)
-        if len(all_phone_names) == 0:
+    for document in tqdm(sorted_dataset):
+        if not all_phone_names:
             break
+        document_phonemes = document["all_phonemes"]
+        new_phonemes = set(document_phonemes).difference(all_phone_names)
+        for new_phoneme in new_phonemes:
+            all_phone_names.remove(new_phoneme)
+        if new_phonemes:
+            covering_set.append(document)
 
     covering_set_dataset = Dataset.from_list(covering_set)
     example_words = get_example_words(phonemes=phonemes)
