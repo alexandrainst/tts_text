@@ -19,5 +19,5 @@ ALL_DATASET_BUILDERS: dict[str, Callable[..., list[str]]] = dict(
     dates=build_date_dataset,
     times=build_time_dataset,
     lex=build_lex_dataset,
-    phoneme_covering_set=build_phoneme_covering_dataset,
+    phoneme_covering=build_phoneme_covering_dataset,
 )
