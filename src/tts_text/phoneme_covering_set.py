@@ -185,7 +185,7 @@ def get_example_words(phonemes: dict) -> dict:
     # Get example words
     da_phonemes = phonemes["da"]
     en_phonemes = phonemes["en"]
-    example_words = {}
+    example_words: dict[str, list[str]] = {}
     example_words["da"] = [
         example for entry in da_phonemes for example in entry["examples"]
     ]
