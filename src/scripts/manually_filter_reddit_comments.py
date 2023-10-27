@@ -34,12 +34,12 @@ def filter_reddit_dataset(
     # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
     assert isinstance(raw_dataset, Dataset)
-    raw_dataset = raw_dataset.select(range(start_index, start_index + n))
     filtered_dataset = raw_dataset.filter(
         lambda example: example["language"] == "da"
         and example["language_confidence"] > 0.95,
         keep_in_memory=True,
     )
+    filtered_dataset = filtered_dataset.select(range(start_index, start_index + n))
     comments = filtered_dataset["doc"]
 
     # Split the comments into sentences
@@ -71,11 +71,12 @@ def filter_reddit_dataset(
         for sentence in dataset
         if re.search(r"https?://[^\s]+", sentence) is None
     ]
-
+    print(len(dataset))
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
     for index, sentence in enumerate(dataset[start_index : start_index + n]):
-        prompt_user(None, records, sentence, username, start_index, index)
+        print(index)
+        records = prompt_user(None, records, sentence, username, start_index, index)
 
     filtered_answers = pd.DataFrame.from_records(records)
     print(filtered_answers)
