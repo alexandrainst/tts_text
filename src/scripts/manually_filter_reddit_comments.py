@@ -10,6 +10,8 @@ import itertools as it
 import re
 import logging
 
+# Set logging level to INFO
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +40,7 @@ nltk.download("punkt", quiet=True)
     required=True,
     help="The username of the person filtering the dataset.",
 )
-def filter_reddit_dataset(output_dir, username, n, start_index):
+def filter_reddit_dataset(output_dir, username, num_samples, start_index):
     """Script for manually filtering a list of reddit comments."""
     logger.info("Hello and welcome to the reddit comment filtering tool!")
     # Load the comments
@@ -46,13 +48,17 @@ def filter_reddit_dataset(output_dir, username, n, start_index):
     assert isinstance(raw_dataset, Dataset)
 
     # Pick a subset of the dataset, to speed up filtering
-    raw_dataset = raw_dataset.select(range(start_index, start_index + (n * 1000)))
+    raw_dataset = raw_dataset.select(
+        range(start_index, start_index + (num_samples * 1000))
+    )
     filtered_dataset = raw_dataset.filter(
         lambda example: example["language"] == "da"
         and example["language_confidence"] > 0.95,
         keep_in_memory=True,
     )
-    filtered_dataset = filtered_dataset.select(range(start_index, start_index + n))
+    filtered_dataset = filtered_dataset.select(
+        range(start_index, start_index + num_samples)
+    )
     filtered_dataset = filtered_dataset.shuffle(seed=703)
     comments = filtered_dataset["doc"]
 
@@ -87,7 +93,7 @@ def filter_reddit_dataset(output_dir, username, n, start_index):
     ]
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
-    for index, sentence in enumerate(dataset[start_index : start_index + n]):
+    for index, sentence in enumerate(dataset[start_index : start_index + num_samples]):
         records = prompt_user(
             answer=None,
             records=records,
