@@ -75,6 +75,13 @@ def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
         if new_phonemes:
             dataset.append(text)
 
+    # If any phonemes were not exhausted then log a warning
+    if all_phonemes:
+        logger.warning(
+            "Remaining phoneme counts which were still left after traversing the "
+            f"corpus: {all_phonemes.keys()}"
+        )
+
     # Save the dataset
     dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "phoneme_covering_set.txt"
     with dataset_path.open("w") as f:
