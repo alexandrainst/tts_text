@@ -91,7 +91,7 @@ def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
 
     # Save the dataset
     dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "phoneme_covering_set.txt"
-    with dataset_path.open("w") as f:
+    with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 
     return dataset
@@ -193,5 +193,5 @@ def load_phonemes(cfg: DictConfig) -> PHONEME_LIST:
         The phoneme list.
     """
     phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
-    with phoneme_path.open() as f:
+    with phoneme_path.open(encoding="utf-8") as f:
         return [PhonemeInfo(**entry) for entry in json.load(f)]

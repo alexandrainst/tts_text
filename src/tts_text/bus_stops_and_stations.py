@@ -29,7 +29,7 @@ def build_bus_stop_and_station_dataset(cfg: DictConfig) -> list[str]:
 
     # Save the dataset
     dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "bus_stops_and_stations.txt"
-    with dataset_path.open("w") as f:
+    with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 
     return dataset
