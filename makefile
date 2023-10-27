@@ -98,8 +98,7 @@ install-poetry:
 	fi
 
 setup-poetry:
-	@poetry env use python3.10 && poetry install
-	@poetry run pip install multiprocess=="0.70.15"
+	@poetry env use python3.11 && poetry install
 
 setup-environment-variables:
 	@poetry run python src/scripts/fix_dot_env_file.py
