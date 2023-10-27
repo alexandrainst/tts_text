@@ -115,6 +115,7 @@ def prompt_user(
     Returns:
         A list of records.
     """
+    print(f"Sentence {start_index + index}: {sentence}")
     if answer is None:
         answer = input("Keep? [y/n]: ")
 
