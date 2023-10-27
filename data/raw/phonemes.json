@@ -61,11 +61,11 @@
     },
     {
         "name": "ɕ",
-        "examples": ["sjat"]
+        "examples": ["sjat", "sjæl", "sjofel", "sjælden", "sjov", "sjovt"]
     },
     {
         "name": "ʁ",
-        "examples": ["ratrat"]
+        "examples": ["rat", "regler", "røg", "røv", "rød", "rødvin", "rødgrød"]
     },
     {
         "name": "b",
@@ -153,7 +153,7 @@
     },
     {
         "name": "ð",
-        "examples": ["leather"]
+        "examples": ["leather", "mad", "fad", "stad", "sad"]
     },
     {
         "name": "ŋ",
@@ -274,5 +274,9 @@
     {
         "name": "ç",
         "examples": ["pjat", "ich", "hugh", "nicht"]
+    },
+    {
+        "name": "ʔ",
+        "examples": ["skib"]
     }
 ]
