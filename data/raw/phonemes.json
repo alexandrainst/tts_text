@@ -18,7 +18,7 @@
         },
         {
             "name": "i",
-            "examples": ["ih"] 
+            "examples": ["ih"]
         },
         {
             "name": "o",
@@ -205,7 +205,7 @@
         },
         {
             "name": "w",
-            "examples": ["wit", "why", "quick", "choir"]
+            "examples": ["wit", "why", "wifi", "woke", "win"]
         },
         {
             "name": "z",
@@ -225,7 +225,7 @@
         },
         {
             "name": "θ",
-            "examples": ["thongs"]
+            "examples": ["thong", "thatcher", "throne"]
         },
         {
             "name": "ð",
@@ -245,7 +245,7 @@
         },
         {
             "name": "eɪ",
-            "examples": ["bay", "maid", "weigh", "straight", "pay", "foyer", "filet", "eight", "gauge", "mate", "break", "they"]
+            "examples": ["bay", "maid", "weigh", "straight", "pay", "foyer", "filet", "eight", "gauge", "mate", "break", "they", "face", "game", "mægler", "mail"]
         },
         {
             "name": "ɛ",
@@ -261,7 +261,7 @@
         },
         {
             "name": "aɪ",
-            "examples": ["spider", "sky", "night", "pie", "guy", "stye", "aisle", "island", "height", "kite"]
+            "examples": ["spider", "sky", "night", "pie", "guy", "stye", "aisle", "island", "height", "kite", "time", "crime"]
         },
         {
             "name": "ɒ",
@@ -269,7 +269,7 @@
         },
         {
             "name": "oʊ",
-            "examples": ["open", "moat", "bone", "toe", "sow", "dough", "beau", "brooch", "sew"]
+            "examples": ["open", "moat", "bone", "toe", "sow", "dough", "beau", "brooch", "sew", "go", "low", "home"]
         },
         {
             "name": "ʊ",
@@ -289,7 +289,7 @@
         },
         {
             "name": "aʊ",
-            "examples": ["now", "shout", "bough"]
+            "examples": ["now", "shout", "bough", "cow", "waow", "house"]
         },
         {
             "name": "ə",
@@ -318,6 +318,38 @@
         {
             "name": "ʊəʳ",
             "examples": ["cure", "tourist"]
+        },
+        {
+            "name": "ɹ",
+            "examples": ["right", "harry", "bro"]
+        },
+        {
+            "name": "ɾ",
+            "examples": ["dürum", "churro", "haram"]
+        },
+        {
+            "name": "ɫ",
+            "examples": ["full", "chill", "inshallah", "girl"]
+        },
+        {
+            "name": "χ",
+            "examples": ["jalapeños", "jalapenos", "ahmed", "loch"]
+        },
+        {
+            "name": "ʤ",
+            "examples": ["juice", "john", "joe", "jazz", "job"]
+        },
+        {
+            "name": "ɲ",
+            "examples": ["jalapeños", "jalapenos", "canyon", "sauvignon", "español", "espanol"]
+        },
+        {
+            "name": "õ",
+            "examples": ["macron", "sauvignon"]
+        },
+        {
+            "name": "ç",
+            "examples": ["pjat", "ich", "hugh", "nicht"]
         }
     ]
 }
