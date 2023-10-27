@@ -8,6 +8,9 @@ from pathlib import Path
 from nltk.tokenize import sent_tokenize
 import itertools as it
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Download the sentence splitter model
@@ -16,12 +19,28 @@ nltk.download("punkt", quiet=True)
 
 @click.command("Starts the process of manually filter reddit comments.")
 @click.option("--output-dir", type=Path, required=True)
-@click.option("--num-samples=", "-n", type=int, default=1000, help="The number of samples to annotate")
-@click.option("--start-index", type=int, default=0, help="The sample index to start annotating from.")
-@click.option("--username", type=str, required=True, help="The username of the person filtering the dataset.")
+@click.option(
+    "--num-samples=",
+    "-n",
+    type=int,
+    default=1000,
+    help="The number of samples to annotate",
+)
+@click.option(
+    "--start-index",
+    type=int,
+    default=0,
+    help="The sample index to start annotating from.",
+)
+@click.option(
+    "--username",
+    type=str,
+    required=True,
+    help="The username of the person filtering the dataset.",
+)
 def filter_reddit_dataset(output_dir, username, n, start_index):
     """Script for manually filtering a list of reddit comments."""
-    print("Hello and welcome to the reddit comment filtering tool!")
+    logger.info("Hello and welcome to the reddit comment filtering tool!")
     # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
     assert isinstance(raw_dataset, Dataset)
@@ -69,7 +88,14 @@ def filter_reddit_dataset(output_dir, username, n, start_index):
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
     for index, sentence in enumerate(dataset[start_index : start_index + n]):
-        records = prompt_user(None, records, sentence, username, start_index, index)
+        records = prompt_user(
+            answer=None,
+            records=records,
+            sentence=sentence,
+            username=username,
+            start_index=start_index,
+            index=index,
+        )
 
     filtered_answers = pd.DataFrame.from_records(records)
 
@@ -78,7 +104,7 @@ def filter_reddit_dataset(output_dir, username, n, start_index):
     if previous_filtering_path.exists():
         previous_filtering = pd.read_csv(previous_filtering_path)
         if not previous_filtering.equals(filtered_answers):
-            print("Previous filtering found, merging with new filtering.")
+            logger.info("Previous filtering found, merging with new filtering.")
             # Merge the previous answers with the new answers.
             concatenated_answers = pd.concat([previous_filtering, filtered_answers])
             filtered_answers = concatenated_answers.groupby(
@@ -109,7 +135,7 @@ def prompt_user(
     Returns:
         A list of records.
     """
-    print(f"Sentence {start_index + index}: {sentence}")
+    logger.info(f"Sentence {start_index + index}: {sentence}")
     if answer is None:
         answer = input("Keep? [y/n]: ")
 
@@ -123,9 +149,16 @@ def prompt_user(
             }
         )
     else:
-        print("Invalid input, must be 'y' or 'n'.")
+        logger.info("Invalid input, must be 'y' or 'n'.")
         answer = input("Keep? [y/n]: ")
-        records = prompt_user(answer, records, sentence, username, start_index, index)
+        records = prompt_user(
+            answer=answer,
+            records=records,
+            sentence=sentence,
+            username=username,
+            start_index=start_index,
+            index=index,
+        )
     return records
 
 
