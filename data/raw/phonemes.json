@@ -25,7 +25,7 @@
     },
     {
         "name": "o",
-        "examples": ["ose"]
+        "examples": ["ose", "rose", "mose", "roser", "moser", "pose", "poser"]
     },
     {
         "name": "ɔ",
@@ -41,7 +41,7 @@
     },
     {
         "name": "pʰ",
-        "examples": ["penne"]
+        "examples": ["pung", "penge"]
     },
     {
         "name": "ts",
@@ -149,7 +149,7 @@
     },
     {
         "name": "θ",
-        "examples": ["thong", "thatcher", "throne"]
+        "examples": ["thongs", "thatcher", "throne"]
     },
     {
         "name": "ð",
@@ -274,9 +274,5 @@
     {
         "name": "ç",
         "examples": ["pjat", "ich", "hugh", "nicht"]
-    },
-    {
-        "name": "ʔ",
-        "examples": ["skib"]
     }
 ]
