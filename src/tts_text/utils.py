@@ -1,7 +1,6 @@
 """Utility functions used by the other modules."""
 
 from typing import Generator
-import numpy as np
 import random
 import itertools as it
 
@@ -33,7 +32,10 @@ def interleave_datasets(
 
     while True:
         # Sample a dataset
-        dataset = np.random.choice(sampling_datasets, p=sampling_probabilities)
+        dataset = random.choices(
+            population=sampling_datasets,
+            weights=sampling_probabilities,
+        )[0]
 
         # If the dataset is empty then stop
         if len(dataset) == 0:
