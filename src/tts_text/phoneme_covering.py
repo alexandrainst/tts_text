@@ -1,5 +1,6 @@
 """Module for creating a phoneme covering set."""
 
+from dataclasses import dataclass
 import json
 import re
 import logging
@@ -22,123 +23,13 @@ logger = logging.getLogger(__name__)
 nltk.download("punkt", quiet=True)
 
 
-def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
-    """Load and sort the Wikipedia dataset by phoneme occurence.
-
-    Args:
-        cfg:
-            The Hydra configuration object.
-
-    Returns:
-        The sorted dataset.
-
-    Raises:
-        ValueError:
-            If `phoneme_covering.phoneme_sort_strategy` in the config is not one of
-            "da", "en" or "all".
-    """
-    # The `wiki40b` dataset is a small dataset so we can load it all into memory
-    # instead of streaming it.
-    dataset = load_dataset(
-        "wiki40b",
-        "da",
-        split="train",
-        beam_runner="DirectRunner",
-    )
-
-    # Split dataset into sentences
-    desc = "Splitting sentences in the Wikipedia dataset"
-    dataset = Dataset.from_dict(
-        dict(
-            text=list(
-                it.chain(
-                    *[
-                        sent_tokenize(text=example, language="danish")
-                        for example in tqdm(iterable=dataset["text"], desc=desc)
-                    ]
-                )
-            )
-        )
-    )
-
-    phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
-    with phoneme_path.open() as f:
-        phonemes = json.load(f)
-
-    # Count phonemes in articles
-    dataset = dataset.map(
-        function=partial(count_phoneme_occurences, phonemes=phonemes, cfg=cfg),
-        desc="Counting phonemes in the Wikipedia dataset",
-    )
-    sort_by = cfg.phoneme_covering.phoneme_sort_strategy
-    if sort_by == "da":
-        dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
-    elif sort_by == "en":
-        dataset = dataset.sort("en_unique_phonemes_count", reverse=True)
-    elif sort_by == "all":
-        dataset = dataset.sort("all_unique_phonemes_count", reverse=True)
-    else:
-        raise ValueError(f"sort_by must be one of 'da', 'en' or 'all', got {sort_by}")
-
-    return dataset
+@dataclass
+class PhonemeInfo:
+    name: str
+    examples: list[str]
 
 
-def count_phoneme_occurences(document: dict, phonemes: dict, cfg: DictConfig) -> dict:
-    """Count the occurences of phonemes in a document.
-
-    Args:
-        document:
-            The document to count phonemes in.
-        phonemes:
-            The phonemes to count.
-        cfg:
-            The Hydra configuration object.
-
-    Returns:
-        The document with phoneme lists and counts added.
-    """
-    # Clean document text, wiki articles have special annotations of sections and
-    # paragraphs, etc.
-    document_text = document["text"]
-    " ".join(
-        re.split(
-            "|".join(cfg.split_strings),
-            document["text"],
-        )
-    )
-    document_text = re.sub(" +", " ", document_text).strip()
-    words = document_text.split(" ")
-
-    counter = Counter(words)
-    for language, phoneme_list in phonemes.items():
-        phoneme_count = 0
-        found_phonemes = []
-        found_example_words = []
-        for phoneme in phoneme_list:
-            for word in phoneme["examples"]:
-                occurences = counter[word]
-                phoneme_count += occurences
-                if occurences > 0:
-                    found_phonemes.append(phoneme["name"])
-                    found_example_words.append(word)
-        document[f"{language}_phoneme_count"] = phoneme_count
-        document[f"{language}_phonemes"] = found_phonemes
-        document[f"{language}_found_example_words"] = found_example_words
-        document[f"{language}_unique_phonemes"] = set(found_phonemes)
-        document[f"{language}_unique_phonemes_count"] = len(set(found_phonemes))
-
-    document["all_phoneme_count"] = (
-        document["da_phoneme_count"] + document["en_phoneme_count"]
-    )
-    document["all_phonemes"] = document["da_phonemes"] + document["en_phonemes"]
-    document["all_found_example_words"] = (
-        document["da_found_example_words"] + document["en_found_example_words"]
-    )
-    document["all_unique_phonemes"] = set(
-        document["da_unique_phonemes"] | document["en_unique_phonemes"]
-    )
-    document["all_unique_phonemes_count"] = len(document["all_unique_phonemes"])
-    return document
+PHONEME_DICT = dict[str, list[PhonemeInfo]]
 
 
 def build_phoneme_covering_dataset(
@@ -161,11 +52,9 @@ def build_phoneme_covering_dataset(
     sorted_dataset = load_and_sort_wikipedia_dataset(cfg=cfg)
 
     # Get set of all unique phonemes
-    phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
-    with phoneme_path.open() as f:
-        phonemes = json.load(f)
-    all_phone_names = {entry["name"] for entry in phonemes["da"]}.union(
-        {entry["name"] for entry in phonemes["en"]}
+    phonemes = load_phonemes(cfg=cfg)
+    all_phone_names = {entry.name for entry in phonemes["da"]}.union(
+        {entry.name for entry in phonemes["en"]}
     )
     all_phonemes = {
         name: cfg.phoneme_covering.min_docs_per_phoneme for name in all_phone_names
@@ -202,25 +91,139 @@ def build_phoneme_covering_dataset(
     return dataset
 
 
-def get_example_words(phonemes: dict) -> dict:
-    """Get example words from the phonemes dict.
+def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
+    """Load and sort the Wikipedia dataset by phoneme occurence.
 
     Args:
-        phonemes:
-            The phonemes dict.
+        cfg:
+            The Hydra configuration object.
 
     Returns:
-        The example words.
+        The sorted dataset.
+
+    Raises:
+        ValueError:
+            If `phoneme_covering.phoneme_sort_strategy` in the config is not one of
+            "da", "en" or "all".
     """
-    # Get example words
-    da_phonemes = phonemes["da"]
-    en_phonemes = phonemes["en"]
-    example_words: dict[str, list[str]] = {}
-    example_words["da"] = [
-        example for entry in da_phonemes for example in entry["examples"]
-    ]
-    example_words["en"] = [
-        example for entry in en_phonemes for example in entry["examples"]
-    ]
-    example_words["all"] = example_words["da"] + example_words["en"]
-    return example_words
+    # The `wiki40b` dataset is a small dataset so we can load it all into memory
+    # instead of streaming it.
+    dataset = load_dataset(
+        "wiki40b",
+        "da",
+        split="train",
+        beam_runner="DirectRunner",
+    )
+
+    def remove_split_strings(example: dict) -> dict:
+        """Removes the special Wikipedia split strings from the text."""
+        doc = example["text"]
+        doc = " ".join(re.split("|".join(cfg.split_strings), doc))
+        example["text"] = doc
+        return example
+
+    # Remove split strings from dataset
+    dataset = dataset.map(
+        function=remove_split_strings,
+        desc="Removing split strings from the Wikipedia dataset",
+    )
+
+    # Split dataset into sentences
+    desc = "Splitting sentences in the Wikipedia dataset"
+    dataset = Dataset.from_dict(
+        dict(
+            text=list(
+                it.chain(
+                    *[
+                        sent_tokenize(text=example, language="danish")
+                        for example in tqdm(iterable=dataset["text"], desc=desc)
+                    ]
+                )
+            )
+        )
+    )
+
+    # Count phonemes in articles
+    dataset = dataset.map(
+        function=partial(count_phoneme_occurences, phonemes=load_phonemes(cfg=cfg)),
+        desc="Counting phonemes in the Wikipedia dataset",
+    )
+    sort_by = cfg.phoneme_covering.phoneme_sort_strategy
+    if sort_by == "da":
+        dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
+    elif sort_by == "en":
+        dataset = dataset.sort("en_unique_phonemes_count", reverse=True)
+    elif sort_by == "all":
+        dataset = dataset.sort("all_unique_phonemes_count", reverse=True)
+    else:
+        raise ValueError(f"sort_by must be one of 'da', 'en' or 'all', got {sort_by}")
+
+    return dataset
+
+
+def count_phoneme_occurences(document: dict, phonemes: PHONEME_DICT) -> dict:
+    """Count the occurences of phonemes in a document.
+
+    Args:
+        document:
+            The document to count phonemes in.
+        phonemes:
+            The phonemes to count.
+
+    Returns:
+        The document with phoneme lists and counts added.
+    """
+    # Clean document text, wiki articles have special annotations of sections and
+    # paragraphs, etc.
+    document_text = document["text"]
+    document_text = re.sub(" +", " ", document_text).strip()
+    words = document_text.split(" ")
+
+    counter = Counter(words)
+    for language, phoneme_list in phonemes.items():
+        phoneme_count = 0
+        found_phonemes = []
+        found_example_words = []
+        for phoneme in phoneme_list:
+            for word in phoneme.examples:
+                occurences = counter[word]
+                phoneme_count += occurences
+                if occurences > 0:
+                    found_phonemes.append(phoneme.name)
+                    found_example_words.append(word)
+        document[f"{language}_phoneme_count"] = phoneme_count
+        document[f"{language}_phonemes"] = found_phonemes
+        document[f"{language}_found_example_words"] = found_example_words
+        document[f"{language}_unique_phonemes"] = set(found_phonemes)
+        document[f"{language}_unique_phonemes_count"] = len(set(found_phonemes))
+
+    document["all_phoneme_count"] = (
+        document["da_phoneme_count"] + document["en_phoneme_count"]
+    )
+    document["all_phonemes"] = document["da_phonemes"] + document["en_phonemes"]
+    document["all_found_example_words"] = (
+        document["da_found_example_words"] + document["en_found_example_words"]
+    )
+    document["all_unique_phonemes"] = set(
+        document["da_unique_phonemes"] | document["en_unique_phonemes"]
+    )
+    document["all_unique_phonemes_count"] = len(document["all_unique_phonemes"])
+    return document
+
+
+def load_phonemes(cfg: DictConfig) -> PHONEME_DICT:
+    """Load the phoneme list.
+
+    Args:
+        cfg:
+            The Hydra configuration object.
+
+    Returns:
+        The phoneme list.
+    """
+    phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
+    with phoneme_path.open() as f:
+        return {
+            language: [PhonemeInfo(**entry) for entry in phoneme_list]
+            for language, phoneme_list in json.load(f).items()
+        }
