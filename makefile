@@ -98,7 +98,7 @@ install-poetry:
 	fi
 
 setup-poetry:
-	@poetry env use python3.10 && poetry install
+	@poetry env use python3.11 && poetry install
 	@poetry run pip install multiprocess=="0.70.15"
 
 setup-environment-variables:
