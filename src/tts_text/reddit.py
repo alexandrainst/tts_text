@@ -54,13 +54,13 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     hf_hub.create_repo(
         repo_id="alexandrainst/scandi-reddit-manually-filtered",
         repo_type="dataset",
-        token=os.environ.get("HF_HUB_TOKEN"),
+        token=os.getenv("HF_HUB_TOKEN", True),
         exist_ok=True,
         private=True,
     )
     filtered_comments.push_to_hub(
         repo_id="alexandrainst/scandi-reddit-manually-filtered",
-        token=os.environ["HF_HUB_TOKEN"],
+        token=os.getenv("HF_HUB_TOKEN", True),
         private=True,
     )
 
