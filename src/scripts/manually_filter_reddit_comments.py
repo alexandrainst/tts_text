@@ -93,7 +93,7 @@ def filter_reddit_dataset(output_dir, username, num_samples, start_index):
     ]
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
-    for index, sentence in enumerate(dataset):
+    for index, sentence in enumerate(dataset[:num_samples]):
         records = prompt_user(
             answer=None,
             records=records,
