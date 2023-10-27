@@ -34,7 +34,7 @@ def filter_reddit_dataset(
     # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
     assert isinstance(raw_dataset, Dataset)
-    raw_dataset = raw_dataset[start_index : start_index + n]
+    raw_dataset = raw_dataset.select(range(start_index, start_index + n))
     filtered_dataset = raw_dataset.filter(
         lambda example: example["language"] == "da"
         and example["language_confidence"] > 0.95,
@@ -75,21 +75,8 @@ def filter_reddit_dataset(
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
     for index, sentence in enumerate(dataset[start_index : start_index + n]):
-        print(sentence)
-        answer = input("Keep? [y/n]: ")
-        while answer not in ["y", "n"]:
-            if answer in ["y", "n"]:
-                records.append(
-                    {
-                        "sentence": sentence,
-                        "username": username,
-                        "keep": answer,
-                        "index": start_index + index,
-                    }
-                )
-            else:
-                print("Invalid input, must be 'y' or 'n'.")
-                answer = input("Keep? [y/n]: ")
+        prompt_user(None, records, sentence, username, start_index, index)
+
     filtered_answers = pd.DataFrame.from_records(records)
     print(filtered_answers)
     # Load the previous answers, if any exist
@@ -105,6 +92,46 @@ def filter_reddit_dataset(
             ).agg({"username": ", ".join, "keep": lambda x: (x == "y").sum() == 2})
 
     filtered_answers.to_csv(Path(output_dir) / "filtered_answers.csv", index=False)
+
+
+def prompt_user(
+    answer: str | None,
+    records: list[dict[str, str | int]],
+    sentence: str,
+    username: str,
+    start_index: int,
+    index: int,
+) -> list[dict[str, str | int]]:
+    """Prompt the user for an answer.
+
+    Args:
+        answer: The answer to the question.
+        records: The records of the previous answers.
+        sentence: The sentence to filter.
+        username: The username of the person filtering the dataset.
+        start_index: The index to start from.
+        index: The index of the sentence in the dataset.
+
+    Returns:
+        A list of records.
+    """
+    if answer is None:
+        answer = input("Keep? [y/n]: ")
+
+    if answer in ["y", "n"]:
+        records.append(
+            {
+                "sentence": sentence,
+                "username": username,
+                "keep": answer,
+                "index": start_index + index,
+            }
+        )
+    else:
+        print("Invalid input, must be 'y' or 'n'.")
+        answer = input("Keep? [y/n]: ")
+        records = prompt_user(answer, records, sentence, username, start_index, index)
+    return records
 
 
 if __name__ == "__main__":
