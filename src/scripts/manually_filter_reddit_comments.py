@@ -43,6 +43,7 @@ def filter_reddit_dataset(
         keep_in_memory=True,
     )
     filtered_dataset = filtered_dataset.select(range(start_index, start_index + n))
+    filtered_dataset = filtered_dataset.shuffle(seed=703)
     comments = filtered_dataset["doc"]
 
     # Split the comments into sentences
