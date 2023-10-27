@@ -13,27 +13,23 @@ logger = logging.getLogger(__name__)
 
 
 @hydra.main(config_path="../../config", config_name="config", version_base=None)
-def main(config: DictConfig) -> None:
+def main(cfg: DictConfig) -> None:
     """Build the Danish text-to-speech dataset.
 
     Args:
-        config: The Hydra configuration.
+        cfg: The Hydra configuration.
 
     Raises:
         ValueError: If the sampling probabilities do not include all the datasets.
     """
     # Get the individual datasets
-    raw_dir = Path(config.dirs.data) / config.dirs.raw
     datasets: dict[str, list[str]] = defaultdict()
     for name, builder in ALL_DATASET_BUILDERS.items():
-        try:
-            datasets[name] = builder(output_dir=raw_dir)
-        except TypeError:
-            datasets[name] = builder(cfg=config, output_dir=raw_dir)
+        datasets[name] = builder(cfg=cfg)
 
     # Ensure that the sampling probabilities include all the datasets
-    datasets_in_config = set(config.sampling_probabilities.keys()).union(
-        config.include_entire_dataset
+    datasets_in_config = set(cfg.sampling_probabilities.keys()).union(
+        cfg.include_entire_dataset
     )
     if datasets_in_config != set(datasets.keys()):
         raise ValueError(
@@ -43,7 +39,7 @@ def main(config: DictConfig) -> None:
         )
 
     non_sampling_datasets = {
-        name: datasets[name] for name in config.include_entire_dataset
+        name: datasets[name] for name in cfg.include_entire_dataset
     }
     sampling_datasets = {
         name: dataset
@@ -56,12 +52,12 @@ def main(config: DictConfig) -> None:
         non_sampling_datasets=list(non_sampling_datasets.values()),
         sampling_datasets=list(sampling_datasets.values()),
         sampling_probabilities=[
-            config.sampling_probabilities[name] for name in sampling_datasets.keys()
+            cfg.sampling_probabilities[name] for name in sampling_datasets.keys()
         ],
     )
 
     # Save the dataset
-    dataset_path = Path(config.dirs.data) / config.dirs.processed / "dataset.txt"
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.processed / "dataset.txt"
     dataset_path.unlink(missing_ok=True)
     with dataset_path.open("a") as f:
         for sample in dataset_itr:
