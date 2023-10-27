@@ -42,7 +42,9 @@ def main(config: DictConfig) -> None:
             f"the sampling probabilities: {set(datasets.keys()) - datasets_in_config}"
         )
 
-    non_sampling_datasets = [datasets[name] for name in config.include_entire_dataset]
+    non_sampling_datasets = {
+        name: datasets[name] for name in config.include_entire_dataset
+    }
     sampling_datasets = {
         name: dataset
         for name, dataset in datasets.items()
@@ -51,7 +53,7 @@ def main(config: DictConfig) -> None:
 
     # Combine the datasets
     dataset_itr = interleave_datasets(
-        non_sampling_datasets=non_sampling_datasets,
+        non_sampling_datasets=list(non_sampling_datasets.values()),
         sampling_datasets=list(sampling_datasets.values()),
         sampling_probabilities=[
             config.sampling_probabilities[name] for name in sampling_datasets.keys()
