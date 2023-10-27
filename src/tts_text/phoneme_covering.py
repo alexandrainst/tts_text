@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 import sys
 from tqdm.auto import tqdm
+import multiprocessing as mp
 
 from datasets import load_dataset, Dataset
 from omegaconf import DictConfig
@@ -108,6 +109,8 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
     dataset = load_dataset("alexandrainst/wiki40b-da", split="train")
+    assert isinstance(dataset, Dataset)
+
     # Truncate the dataset if we're testing
     if hasattr(sys, "_called_from_test"):
         dataset = dataset.select(range(100))
@@ -131,9 +134,11 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     )
 
     # Count phonemes in articles
-    dataset = Dataset.from_dict(dict(text=sentences)).map(
+    dataset = Dataset.from_dict(dict(text=sentences))
+    dataset = dataset.map(
         function=partial(count_phoneme_occurences, phonemes=load_phonemes(cfg=cfg)),
         desc="Counting phonemes in the Wikipedia dataset",
+        num_proc=mp.cpu_count(),
     )
     sort_by = cfg.phoneme_covering.phoneme_sort_strategy
     if sort_by == "da":
