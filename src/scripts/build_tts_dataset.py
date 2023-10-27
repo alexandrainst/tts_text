@@ -43,16 +43,18 @@ def main(config: DictConfig) -> None:
         )
 
     non_sampling_datasets = [datasets[name] for name in config.include_entire_dataset]
-    sampling_datasets = [
-        datasets[name] for name in datasets.keys() if name not in non_sampling_datasets
-    ]
+    sampling_datasets = {
+        name: dataset
+        for name, dataset in datasets.items()
+        if name not in non_sampling_datasets
+    }
 
     # Combine the datasets
     dataset_itr = interleave_datasets(
         non_sampling_datasets=non_sampling_datasets,
-        sampling_datasets=sampling_datasets,
+        sampling_datasets=list(sampling_datasets.values()),
         sampling_probabilities=[
-            config.sampling_probabilities[name] for name in datasets.keys()
+            config.sampling_probabilities[name] for name in sampling_datasets.keys()
         ],
     )
 
