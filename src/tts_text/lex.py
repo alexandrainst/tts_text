@@ -2,21 +2,17 @@
 
 from datasets import Dataset, load_dataset
 from pathlib import Path
-import nltk
-from nltk.tokenize import sent_tokenize
-import itertools as it
-import re
+
+from omegaconf import DictConfig
+
+from .utils import extract_sentences
 
 
-# Download the sentence splitter model
-nltk.download("punkt", quiet=True)
-
-
-def build_lex_dataset(output_dir: Path | str) -> list[str]:
+def build_lex_dataset(cfg: DictConfig) -> list[str]:
     """Build the Lex.dk dataset.
 
     Args:
-        output_dir: The directory to save the dataset to.
+        cfg: The Hydra configuration object.
 
     Returns:
         A list of articles from Lex.dk.
@@ -27,30 +23,12 @@ def build_lex_dataset(output_dir: Path | str) -> list[str]:
     articles = raw_dataset["text"]
 
     # Split the articles into sentences
-    dataset = list(
-        it.chain(
-            *[sent_tokenize(text=article, language="danish") for article in articles]
-        )
+    dataset = extract_sentences(
+        corpus=articles, min_sentence_length=cfg.min_sentence_length
     )
 
-    # Remove newlines
-    dataset = [sentence.replace("\n", " ") for sentence in dataset]
-
-    # Remove too short sentences
-    dataset = [sentence for sentence in dataset if len(sentence) > 10]
-
-    # Remove sentences ending in "..."
-    dataset = [sentence for sentence in dataset if not sentence.endswith("...")]
-
-    # Remove sentences ending in an abbreviation
-    dataset = [
-        sentence
-        for sentence in dataset
-        if re.search(r"\.[A-ZÆØÅa-zæøå]+\.$", sentence) is None
-    ]
-
     # Save the dataset
-    dataset_path = Path(output_dir) / "lex.txt"
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "lex.txt"
     with dataset_path.open("w") as f:
         f.write("\n".join(dataset))
 

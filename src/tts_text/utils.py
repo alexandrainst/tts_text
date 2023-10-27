@@ -3,6 +3,65 @@
 from typing import Generator
 import random
 import itertools as it
+from tqdm.auto import tqdm
+import nltk
+from nltk.tokenize import sent_tokenize
+import re
+
+
+# Download the sentence splitter model
+nltk.download("punkt", quiet=True)
+
+
+def extract_sentences(corpus: list[str], min_sentence_length: int) -> list[str]:
+    """Extract sentences from a corpus of text.
+
+    Args:
+        corpus: The corpus to extract sentences from.
+        min_sentence_length: The minimum length of a sentence.
+
+    Returns:
+        The sentences in the corpus.
+    """
+    # Split dataset into sentences
+    sentences = list(
+        it.chain(
+            *[
+                sent_tokenize(text=example, language="danish")
+                for example in tqdm(iterable=corpus, desc="Splitting sentences")
+            ]
+        )
+    )
+
+    # Remove newlines
+    sentences = [sentence.replace("\n", " ") for sentence in sentences]
+
+    # Remove sentences beginning or ending in "..."
+    sentences = [
+        sentence
+        for sentence in sentences
+        if not sentence.startswith("...") and not sentence.endswith("...")
+    ]
+
+    # Remove sentences ending in an abbreviation
+    sentences = [
+        sentence
+        for sentence in sentences
+        if re.search(r"\.[A-ZÆØÅa-zæøå]+\.$", sentence) is None
+    ]
+
+    # Remove redundant whitespace
+    sentences = [re.sub(" +", " ", sentence) for sentence in sentences]
+
+    # Remove trailing whitespace, tabs and newlines
+    sentences = [sentence.strip(" \t\n") for sentence in sentences]
+
+    # Remove too short sentences
+    sentences = [
+        sentence for sentence in sentences if len(sentence) > min_sentence_length
+    ]
+
+    return sentences
 
 
 def interleave_datasets(

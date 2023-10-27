@@ -11,16 +11,11 @@ from tqdm.auto import tqdm
 
 from datasets import load_dataset, Dataset
 from omegaconf import DictConfig
-import nltk
-from nltk.tokenize import sent_tokenize
-import itertools as it
+
+from .utils import extract_sentences
 
 
 logger = logging.getLogger(__name__)
-
-
-# Download the sentence splitter model
-nltk.download("punkt", quiet=True)
 
 
 @dataclass
@@ -32,9 +27,7 @@ class PhonemeInfo:
 PHONEME_DICT = dict[str, list[PhonemeInfo]]
 
 
-def build_phoneme_covering_dataset(
-    cfg: DictConfig, output_dir: Path | str
-) -> list[str]:
+def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
     """Create a phoneme covering set from the sorted wiki dataset.
 
     A phoneme covering set is a set of strings that contains at least one example
@@ -43,8 +36,6 @@ def build_phoneme_covering_dataset(
     Args:
         cfg:
             The Hydra configuration object.
-        output_dir:
-            The directory to save the dataset to.
 
     Returns:
         The phoneme covering set.
@@ -84,7 +75,7 @@ def build_phoneme_covering_dataset(
             dataset.append(text)
 
     # Save the dataset
-    dataset_path = Path(output_dir) / "phoneme_covering_set.txt"
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "phoneme_covering_set.txt"
     with dataset_path.open("w") as f:
         f.write("\n".join(dataset))
 
@@ -118,7 +109,7 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     def remove_split_strings(example: dict) -> dict:
         """Removes the special Wikipedia split strings from the text."""
         doc = example["text"]
-        doc = " ".join(re.split("|".join(cfg.split_strings), doc))
+        doc = "\n".join(re.split("|".join(cfg.split_strings), doc))
         example["text"] = doc
         return example
 
@@ -129,22 +120,12 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     )
 
     # Split dataset into sentences
-    desc = "Splitting sentences in the Wikipedia dataset"
-    dataset = Dataset.from_dict(
-        dict(
-            text=list(
-                it.chain(
-                    *[
-                        sent_tokenize(text=example, language="danish")
-                        for example in tqdm(iterable=dataset["text"], desc=desc)
-                    ]
-                )
-            )
-        )
+    sentences = extract_sentences(
+        corpus=dataset["text"], min_sentence_length=cfg.min_sentence_length
     )
 
     # Count phonemes in articles
-    dataset = dataset.map(
+    dataset = Dataset.from_dict(dict(text=sentences)).map(
         function=partial(count_phoneme_occurences, phonemes=load_phonemes(cfg=cfg)),
         desc="Counting phonemes in the Wikipedia dataset",
     )
