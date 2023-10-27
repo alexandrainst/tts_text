@@ -16,7 +16,7 @@ nltk.download("punkt", quiet=True)
 
 @click.command("Starts the process of manually filter reddit comments.")
 @click.option("--output-dir", type=Path, required=True)
-@click.option("--n", type=int, default=1000)
+@click.option("--num-samples=", "-n", type=int, default=1000, help="The number of samples to annotate")
 @click.option("--start-index", type=int, default=0)
 @click.option("--username", type=str, required=True)
 def filter_reddit_dataset(
