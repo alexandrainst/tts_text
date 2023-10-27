@@ -30,11 +30,13 @@ def filter_reddit_dataset(
         n: The number of sentences to manually filter.
         start_index: The index to start from.
     """
+    print("Hello and welcome to the reddit comment filtering tool!")
     # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
     assert isinstance(raw_dataset, Dataset)
+    raw_dataset = raw_dataset[start_index : start_index + n]
     filtered_dataset = raw_dataset.filter(
-        lambda example: example["lang"] == "da"
+        lambda example: example["language"] == "da"
         and example["language_confidence"] > 0.95,
         keep_in_memory=True,
     )
@@ -89,7 +91,7 @@ def filter_reddit_dataset(
                 print("Invalid input, must be 'y' or 'n'.")
                 answer = input("Keep? [y/n]: ")
     filtered_answers = pd.DataFrame.from_records(records)
-
+    print(filtered_answers)
     # Load the previous answers, if any exist
     previous_answers_path = Path(output_dir) / "filtered_answers.csv"
     if previous_answers_path.exists():
@@ -100,6 +102,10 @@ def filter_reddit_dataset(
             concatenated_answers = pd.concat([previous_answers, filtered_answers])
             filtered_answers = concatenated_answers.groupby(
                 ["sentence", "index"], as_index=False, sort=False
-            ).agg({"username": ", ".join, "Result": lambda x: (x == "y").sum() == 2})
+            ).agg({"username": ", ".join, "keep": lambda x: (x == "y").sum() == 2})
 
     filtered_answers.to_csv(Path(output_dir) / "filtered_answers.csv", index=False)
+
+
+if __name__ == "__main__":
+    filter_reddit_dataset()
