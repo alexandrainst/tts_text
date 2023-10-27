@@ -18,7 +18,7 @@ nltk.download("punkt", quiet=True)
 @click.option("--output-dir", type=Path, required=True)
 @click.option("--num-samples=", "-n", type=int, default=1000, help="The number of samples to annotate")
 @click.option("--start-index", type=int, default=0, help="The sample index to start annotating from.")
-@click.option("--username", type=str, required=True)
+@click.option("--username", type=str, required=True, help="The username of the person filtering the dataset.")
 def filter_reddit_dataset(
     output_dir: Path | str, username: str, n: int = 1000, start_index: int = 0
 ):
