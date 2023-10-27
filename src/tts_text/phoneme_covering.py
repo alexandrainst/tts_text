@@ -80,7 +80,7 @@ def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
     if all_phonemes:
         logger.warning(
             "Remaining phoneme counts which were still left after traversing the "
-            f"corpus: {all_phonemes.keys()}"
+            f"corpus: {all_phonemes}"
         )
 
     # Save the dataset
