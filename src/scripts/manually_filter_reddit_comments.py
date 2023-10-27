@@ -81,18 +81,18 @@ def filter_reddit_dataset(
 
     filtered_answers = pd.DataFrame.from_records(records)
     # Load the previous answers, if any exist
-    previous_answers_path = Path(output_dir) / "filtered_answers.csv"
-    if previous_answers_path.exists():
-        previous_answers = pd.read_csv(previous_answers_path)
-        if not previous_answers.equals(filtered_answers):
-            print("Previous answers found, merging with new answers.")
+    previous_filtering_path = Path(output_dir) / "filtered_comments.csv"
+    if previous_filtering_path.exists():
+        previous_filtering = pd.read_csv(previous_filtering_path)
+        if not previous_filtering.equals(filtered_answers):
+            print("Previous filtering found, merging with new filtering.")
             # Merge the previous answers with the new answers.
-            concatenated_answers = pd.concat([previous_answers, filtered_answers])
+            concatenated_answers = pd.concat([previous_filtering, filtered_answers])
             filtered_answers = concatenated_answers.groupby(
                 ["sentence", "index"], as_index=False, sort=False
             ).agg({"username": ", ".join, "keep": ", ".join})
 
-    filtered_answers.to_csv(Path(output_dir) / "filtered_answers.csv", index=False)
+    filtered_answers.to_csv(Path(output_dir) / "filtered_comments.csv", index=False)
 
 
 def prompt_user(
