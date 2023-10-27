@@ -121,11 +121,10 @@ setup-git:
 	fi
 	@poetry run pre-commit install
 
-
 add-repo-to-git:
 	@export GPG_TTY=$(tty)
 	@gpgconf --kill gpg-agent
-	@if [ ! "$(shell git status --short)" = "" ] && [ "$(shell git log --all)" = "" ]; then \
+	@if [ ! "$(shell git status --short)" = "" ]; then \
 		git add .; \
 		git commit --quiet -m "Initial commit"; \
 	fi
