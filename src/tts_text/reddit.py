@@ -1,11 +1,9 @@
 """Building a list of reddit comments."""
 
-from datasets import Dataset, load_dataset
+from datasets import Dataset
 from pathlib import Path
 import nltk
-from nltk.tokenize import sent_tokenize
-import itertools as it
-import re
+import huggingface_hub as hf_hub
 
 
 # Download the sentence splitter model
@@ -21,49 +19,40 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     Returns:
         A list of reddit.com comments.
     """
-    # Load the comments
-    raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
-    assert isinstance(raw_dataset, Dataset)
-    filtered_dataset = raw_dataset.filter(
-        lambda example: example["lang"] == "da"
-        and example["language_confidence"] > 0.95,
-        keep_in_memory=True,
-    )
-    comments = filtered_dataset["doc"]
-
-    # Split the comments into sentences
-    dataset = list(
-        it.chain(
-            *[sent_tokenize(text=article, language="danish") for article in comments]
+    # Load the manually filtered comments
+    filtered_comments_path = Path(output_dir) / "filtered_comments.csv"
+    if filtered_comments_path.exists():
+        filtered_comments = Dataset.from_csv(path=filtered_comments_path)
+    else:
+        raise FileNotFoundError(
+            f"The filtered comments file was not found at {filtered_comments_path}. "
+            "Please run the manually_filter_reddit_comments.py script."
         )
-    )
 
-    # Remove newlines
-    dataset = [sentence.replace("\n", " ") for sentence in dataset]
-
-    # Remove too short sentences
-    dataset = [sentence for sentence in dataset if len(sentence) > 10]
-
-    # Remove sentences ending in "..."
-    dataset = [sentence for sentence in dataset if not sentence.endswith("...")]
-
-    # Remove sentences ending in an abbreviation
-    dataset = [
-        sentence
-        for sentence in dataset
-        if re.search(r"\.[A-ZÆØÅa-zæøå]+\.$", sentence) is None
-    ]
-
-    # Remove sentences with urls
-    dataset = [
-        sentence
-        for sentence in dataset
-        if re.search(r"https?://[^\s]+", sentence) is None
+    # Take sentences from the filtered comments, which have all answers as "y"
+    filtered_comments_text = [
+        comment["sentence"]
+        for comment in filtered_comments
+        if all(answer == "y" for answer in comment["keep"].split(" ,"))
     ]
 
     # Save the dataset
     dataset_path = Path(output_dir) / "reddit.txt"
     with dataset_path.open("w") as f:
-        f.write("\n".join(dataset))
+        f.write("\n".join(filtered_comments_text))
 
-    return dataset
+    # Create a dataset repo on huggingface.co
+    hf_hub.create_repo(
+        repo_id="alexandrainst/scandi-reddit-manually-filtered",
+        repo_type="dataset",
+        token=hf_hub.get_token(),
+        exist_ok=True,
+    )
+    filtered_comments.push_to_hub(
+        repo_id="alexandrainst/scandi-reddit-manually-filtered",
+        token=hf_hub.get_token(),
+        commit_message="Manually filtered reddit.com comments.",
+        create_pr=True,
+    )
+
+    return filtered_comments_text
