@@ -99,12 +99,7 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     """
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
-    dataset = load_dataset(
-        "wiki40b",
-        "da",
-        split="train",
-        beam_runner="DirectRunner",
-    )
+    dataset = load_dataset("alexandrainst/wiki40b-da", split="train")
 
     def remove_split_strings(example: dict) -> dict:
         """Removes the special Wikipedia split strings from the text."""
