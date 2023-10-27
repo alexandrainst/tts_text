@@ -20,7 +20,7 @@ nltk.download("punkt", quiet=True)
 @click.command("Starts the process of manually filter reddit comments.")
 @click.option("--output-dir", type=Path, required=True)
 @click.option(
-    "--num-samples=",
+    "--num-samples",
     "-n",
     type=int,
     default=1000,
