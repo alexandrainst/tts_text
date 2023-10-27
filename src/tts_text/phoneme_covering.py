@@ -109,7 +109,7 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     def remove_split_strings(example: dict) -> dict:
         """Removes the special Wikipedia split strings from the text."""
         doc = example["text"]
-        doc = "\n".join(re.split("|".join(cfg.split_strings), doc))
+        doc = "\n".join(re.split("|".join(cfg.phoneme_covering.split_strings), doc))
         example["text"] = doc
         return example
 
