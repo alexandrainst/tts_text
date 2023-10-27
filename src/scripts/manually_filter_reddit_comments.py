@@ -19,17 +19,8 @@ nltk.download("punkt", quiet=True)
 @click.option("--num-samples=", "-n", type=int, default=1000, help="The number of samples to annotate")
 @click.option("--start-index", type=int, default=0, help="The sample index to start annotating from.")
 @click.option("--username", type=str, required=True, help="The username of the person filtering the dataset.")
-def filter_reddit_dataset(
-    output_dir: Path | str, username: str, n: int = 1000, start_index: int = 0
-):
-    """Script for manually filtering a list of reddit comments.
-
-    Args:
-        output_dir: The directory to save the dataset to.
-        username: The username of the person filtering the dataset.
-        n: The number of sentences to manually filter.
-        start_index: The index to start from.
-    """
+def filter_reddit_dataset(output_dir, username, n, start_index):
+    """Script for manually filtering a list of reddit comments."""
     print("Hello and welcome to the reddit comment filtering tool!")
     # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
