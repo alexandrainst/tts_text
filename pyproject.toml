@@ -39,7 +39,7 @@ addopts = [
     '-vv',
     '--doctest-modules',
     '--cov=src/tts_text',
-    '-n 2',
+    '-n 8',
 ]
 xfail_strict = true
 filterwarnings = [
