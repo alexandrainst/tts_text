@@ -23,6 +23,10 @@ def extract_sentences(corpus: list[str], min_sentence_length: int) -> list[str]:
     Returns:
         The sentences in the corpus.
     """
+    # Firstly split by newline, where we assume that a sentence does not span multiple
+    # lines
+    corpus = list(it.chain(*[example.split("\n") for example in corpus]))
+
     # Split dataset into sentences
     sentences = list(
         it.chain(
@@ -94,6 +98,7 @@ def interleave_datasets(
         dataset = random.choices(
             population=sampling_datasets,
             weights=sampling_probabilities,
+            k=1,
         )[0]
 
         # If the dataset is empty then stop
