@@ -7,6 +7,7 @@ import logging
 from functools import partial
 from collections import Counter
 from pathlib import Path
+import sys
 from tqdm.auto import tqdm
 
 from datasets import load_dataset, Dataset
@@ -100,6 +101,9 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
     dataset = load_dataset("alexandrainst/wiki40b-da", split="train")
+    # Truncate the dataset if we're testing
+    if hasattr(sys, "_called_from_test"):
+        dataset = dataset.select(range(100))
 
     def remove_split_strings(example: dict) -> dict:
         """Removes the special Wikipedia split strings from the text."""
