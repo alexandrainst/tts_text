@@ -176,12 +176,12 @@ def count_phoneme_occurences(document: dict, phonemes: PHONEME_DICT) -> dict:
         found_phonemes = []
         found_example_words = []
         for phoneme in phoneme_list:
-            for word in phoneme.examples:
-                occurences = counter[word]
+            for example_word in phoneme.examples:
+                occurences = counter[example_word]
                 phoneme_count += occurences
                 if occurences > 0:
                     found_phonemes.append(phoneme.name)
-                    found_example_words.append(word)
+                    found_example_words.append(example_word)
         document[f"{language}_phoneme_count"] = phoneme_count
         document[f"{language}_phonemes"] = found_phonemes
         document[f"{language}_found_example_words"] = found_example_words
