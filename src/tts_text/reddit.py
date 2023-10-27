@@ -25,11 +25,12 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     filtered_comments_path = Path(output_dir) / "filtered_comments.csv"
     if filtered_comments_path.exists():
         filtered_comments_df = pd.read_csv(filtered_comments_path)
-        filtered_comments = Dataset.from_pandas(filtered_comments_df)
+        filtered_comments = Dataset.from_pandas(filtered_comments_df, split="train")
     else:
         try:
             filtered_comments = load_dataset(
-                "alexandrainst/scandi-reddit-manually-filtered"
+                "alexandrainst/scandi-reddit-manually-filtered",
+                split="train",
             )
         except FileNotFoundError:
             raise FileNotFoundError(
