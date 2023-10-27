@@ -80,7 +80,6 @@ def filter_reddit_dataset(
         records = prompt_user(None, records, sentence, username, start_index, index)
 
     filtered_answers = pd.DataFrame.from_records(records)
-    print(filtered_answers)
     # Load the previous answers, if any exist
     previous_answers_path = Path(output_dir) / "filtered_answers.csv"
     if previous_answers_path.exists():
