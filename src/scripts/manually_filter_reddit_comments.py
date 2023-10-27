@@ -72,6 +72,7 @@ def filter_reddit_dataset(output_dir, username, n, start_index):
         records = prompt_user(None, records, sentence, username, start_index, index)
 
     filtered_answers = pd.DataFrame.from_records(records)
+
     # Load the previous answers, if any exist
     previous_filtering_path = Path(output_dir) / "filtered_comments.csv"
     if previous_filtering_path.exists():
