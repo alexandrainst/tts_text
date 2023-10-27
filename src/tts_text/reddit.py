@@ -1,5 +1,7 @@
 """Building a list of reddit comments."""
 
+import os
+import pandas as pd
 from datasets import Dataset, load_dataset
 from pathlib import Path
 import nltk
@@ -22,7 +24,8 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     # Load the manually filtered comments
     filtered_comments_path = Path(output_dir) / "filtered_comments.csv"
     if filtered_comments_path.exists():
-        filtered_comments = Dataset.from_csv(path=filtered_comments_path)
+        filtered_comments_df = pd.read_csv(filtered_comments_path)
+        filtered_comments = Dataset.from_pandas(filtered_comments_df)
     else:
         try:
             filtered_comments = load_dataset(
@@ -51,14 +54,14 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     hf_hub.create_repo(
         repo_id="alexandrainst/scandi-reddit-manually-filtered",
         repo_type="dataset",
-        token=hf_hub.get_token(),
+        token=os.environ.get("HF_HUB_TOKEN"),
         exist_ok=True,
+        private=True,
     )
     filtered_comments.push_to_hub(
         repo_id="alexandrainst/scandi-reddit-manually-filtered",
-        token=hf_hub.get_token(),
-        commit_message="Manually filtered reddit.com comments.",
-        create_pr=True,
+        token=os.environ["HF_HUB_TOKEN"],
+        private=True,
     )
 
     return filtered_comments_text
