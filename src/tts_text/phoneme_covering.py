@@ -165,10 +165,9 @@ def count_phoneme_occurences(document: dict, phonemes: PHONEME_DICT) -> dict:
     Returns:
         The document with phoneme lists and counts added.
     """
-    # Clean document text, wiki articles have special annotations of sections and
-    # paragraphs, etc.
+    # Extract the words from the document
     document_text = document["text"]
-    document_text = re.sub(" +", " ", document_text).strip()
+    document_text = re.sub(" +", " ", document_text).strip().lower()
     words = document_text.split(" ")
 
     counter = Counter(words)
