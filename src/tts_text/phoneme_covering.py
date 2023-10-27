@@ -22,18 +22,20 @@ logger = logging.getLogger(__name__)
 nltk.download("punkt", quiet=True)
 
 
-def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
-    """Load and sort the wiki dataset by phoneme occurence.
+def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
+    """Load and sort the Wikipedia dataset by phoneme occurence.
 
     Args:
-        cfg: The Hydra configuration object.
+        cfg:
+            The Hydra configuration object.
 
     Returns:
         The sorted dataset.
 
     Raises:
-        ValueError: If `phoneme_sort_strategy` in the config is not one of "da", "en"
-            or "all".
+        ValueError:
+            If `phoneme_covering.phoneme_sort_strategy` in the config is not one of
+            "da", "en" or "all".
     """
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
@@ -68,7 +70,7 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         function=partial(count_phoneme_occurences, phonemes=phonemes, cfg=cfg),
         desc="Counting phonemes in the Wikipedia dataset",
     )
-    sort_by = cfg.phoneme_sort_strategy
+    sort_by = cfg.phoneme_covering.phoneme_sort_strategy
     if sort_by == "da":
         dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
     elif sort_by == "en":
@@ -85,9 +87,12 @@ def count_phoneme_occurences(document: dict, phonemes: dict, cfg: DictConfig) ->
     """Count the occurences of phonemes in a document.
 
     Args:
-        document: The document to count phonemes in.
-        phonemes: The phonemes to count.
-        cfg: The Hydra configuration object.
+        document:
+            The document to count phonemes in.
+        phonemes:
+            The phonemes to count.
+        cfg:
+            The Hydra configuration object.
 
     Returns:
         The document with phoneme lists and counts added.
@@ -145,28 +150,37 @@ def build_phoneme_covering_dataset(
     word for each phoneme.
 
     Args:
-        cfg: The Hydra configuration object.
-        output_dir: The directory to save the dataset to.
+        cfg:
+            The Hydra configuration object.
+        output_dir:
+            The directory to save the dataset to.
 
     Returns:
         The phoneme covering set.
     """
-    sorted_dataset = load_and_wiki_by_phoneme_occurence(cfg=cfg)
+    sorted_dataset = load_and_sort_wikipedia_dataset(cfg=cfg)
 
+    # Get set of all unique phonemes
     phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
     with phoneme_path.open() as f:
         phonemes = json.load(f)
     all_phone_names = {entry["name"] for entry in phonemes["da"]}.union(
         {entry["name"] for entry in phonemes["en"]}
     )
-    covering_set = []
+    all_phonemes = {
+        name: cfg.phoneme_covering.min_docs_per_phoneme for name in all_phone_names
+    }
+
+    covering_set: list[str] = list()
     for document in tqdm(sorted_dataset):
-        if not all_phone_names:
+        if not all_phonemes:
             break
         document_phonemes = document["all_phonemes"]
-        new_phonemes = set(all_phone_names).intersection(document_phonemes)
+        new_phonemes = set(all_phonemes.keys()).intersection(document_phonemes)
         for new_phoneme in new_phonemes:
-            all_phone_names.remove(new_phoneme)
+            all_phonemes[new_phoneme] -= 1
+            if all_phonemes[new_phoneme] == 0:
+                all_phonemes.pop(new_phoneme)
         if new_phonemes:
             covering_set.append(document)
 
@@ -203,7 +217,8 @@ def get_example_words(phonemes: dict) -> dict:
     """Get example words from the phonemes dict.
 
     Args:
-        phonemes: The phonemes dict.
+        phonemes:
+            The phonemes dict.
 
     Returns:
         The example words.

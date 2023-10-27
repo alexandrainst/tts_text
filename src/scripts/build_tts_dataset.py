@@ -32,15 +32,25 @@ def main(config: DictConfig) -> None:
             datasets[name] = builder(cfg=config, output_dir=raw_dir)
 
     # Ensure that the sampling probabilities include all the datasets
-    if set(config.sampling_probabilities.keys()) != set(datasets.keys()):
+    datasets_in_config = set(config.sampling_probabilities.keys()).union(
+        config.include_entire_dataset
+    )
+    if datasets_in_config != set(datasets.keys()):
         raise ValueError(
-            "The sampling probabilities must include all the datasets. Was missing "
-            f"{set(datasets.keys()) - set(config.sampling_probabilities.keys())}."
+            "All datasets must appear either in the sampling probabilities or in the "
+            "`include_entire_dataset` list. The following datasets are missing from "
+            f"the sampling probabilities: {set(datasets.keys()) - datasets_in_config}"
         )
+
+    non_sampling_datasets = [datasets[name] for name in config.include_entire_dataset]
+    sampling_datasets = [
+        datasets[name] for name in datasets.keys() if name not in non_sampling_datasets
+    ]
 
     # Combine the datasets
     dataset_itr = interleave_datasets(
-        datasets=list(datasets.values()),
+        non_sampling_datasets=non_sampling_datasets,
+        sampling_datasets=sampling_datasets,
         sampling_probabilities=[
             config.sampling_probabilities[name] for name in datasets.keys()
         ],

@@ -18,10 +18,15 @@ split_strings:
   - _START_SECTION_
   - _START_PARAGRAPH_
 
-phoneme_sort_strategy: da
 sampling_probabilities:
   dates: 0.0625
   times: 0.0625
   bus_stops_and_stations: 0.125
   lex: 0.375
-  phoneme_covering: 0.375
+
+include_entire_dataset:
+  - phoneme_covering
+
+phoneme_covering:
+  phoneme_sort_strategy: da
+  min_docs_per_phoneme: 20
