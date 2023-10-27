@@ -1,5 +1,6 @@
 """Utility functions used by the other modules."""
 
+from copy import deepcopy
 from typing import Generator
 import random
 import itertools as it
@@ -93,7 +94,10 @@ def interleave_datasets(
     random.shuffle(joined_non_sampling_datasets)
     yield from joined_non_sampling_datasets
 
-    while True:
+    # Make a copy of the sampling datasets to avoid mutating the original
+    sampling_datasets = deepcopy(sampling_datasets)
+
+    while len(sampling_datasets) > 0:
         # Sample a dataset
         dataset = random.choices(
             population=sampling_datasets,
@@ -103,7 +107,7 @@ def interleave_datasets(
 
         # If the dataset is empty then stop
         if len(dataset) == 0:
-            return
+            break
 
         # Sample a sample from the dataset
         sample_idx = random.randrange(len(dataset))
