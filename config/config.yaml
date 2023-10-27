@@ -20,14 +20,4 @@ include_entire_dataset:
   - phoneme_covering
 
 min_sentence_length: 30
-
-phoneme_covering:
-  phoneme_sort_strategy: da
-  min_docs_per_phoneme: 20
-  split_strings:
-    - \t
-    - \n
-    - _NEWLINE_
-    - _START_ARTICLE_
-    - _START_SECTION_
-    - _START_PARAGRAPH_
+min_docs_per_phoneme: 20

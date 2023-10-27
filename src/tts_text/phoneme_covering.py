@@ -20,13 +20,23 @@ from .utils import extract_sentences
 logger = logging.getLogger(__name__)
 
 
+SPLIT_STRINGS = [
+    "\t",
+    "\n",
+    "_NEWLINE_",
+    "_START_ARTICLE_",
+    "_START_SECTION_",
+    "_START_PARAGRAPH_",
+]
+
+
 @dataclass
 class PhonemeInfo:
     name: str
     examples: list[str]
 
 
-PHONEME_DICT = dict[str, list[PhonemeInfo]]
+PHONEME_LIST = list[PhonemeInfo]
 
 
 def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
@@ -46,12 +56,8 @@ def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
 
     # Get set of all unique phonemes
     phonemes = load_phonemes(cfg=cfg)
-    all_phone_names = {entry.name for entry in phonemes["da"]}.union(
-        {entry.name for entry in phonemes["en"]}
-    )
-    all_phonemes = {
-        name: cfg.phoneme_covering.min_docs_per_phoneme for name in all_phone_names
-    }
+    all_phone_names = {phoneme.name for phoneme in phonemes}
+    all_phonemes = {name: cfg.min_docs_per_phoneme for name in all_phone_names}
 
     # Create phoneme covering set
     dataset: list[str] = list()
@@ -61,7 +67,7 @@ def build_phoneme_covering_dataset(cfg: DictConfig) -> list[str]:
             break
 
         text = document["text"]
-        document_phonemes = document["all_phonemes"]
+        document_phonemes = document["phonemes"]
 
         # For each new phoneme found in the document, decrement the count of that
         # phoneme in the set of all phonemes. If the count reaches zero then remove
@@ -100,11 +106,6 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
 
     Returns:
         The sorted dataset.
-
-    Raises:
-        ValueError:
-            If `phoneme_covering.phoneme_sort_strategy` in the config is not one of
-            "da", "en" or "all".
     """
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
@@ -118,7 +119,7 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     def remove_split_strings(example: dict) -> dict:
         """Removes the special Wikipedia split strings from the text."""
         doc = example["text"]
-        doc = "\n".join(re.split("|".join(cfg.phoneme_covering.split_strings), doc))
+        doc = "\n".join(re.split("|".join(SPLIT_STRINGS), doc))
         example["text"] = doc
         return example
 
@@ -140,20 +141,12 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
         desc="Counting phonemes in the Wikipedia dataset",
         num_proc=mp.cpu_count(),
     )
-    sort_by = cfg.phoneme_covering.phoneme_sort_strategy
-    if sort_by == "da":
-        dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
-    elif sort_by == "en":
-        dataset = dataset.sort("en_unique_phonemes_count", reverse=True)
-    elif sort_by == "all":
-        dataset = dataset.sort("all_unique_phonemes_count", reverse=True)
-    else:
-        raise ValueError(f"sort_by must be one of 'da', 'en' or 'all', got {sort_by}")
+    dataset = dataset.sort("unique_phonemes_count", reverse=True)
 
     return dataset
 
 
-def count_phoneme_occurences(document: dict, phonemes: PHONEME_DICT) -> dict:
+def count_phoneme_occurences(document: dict, phonemes: PHONEME_LIST) -> dict:
     """Count the occurences of phonemes in a document.
 
     Args:
@@ -171,38 +164,25 @@ def count_phoneme_occurences(document: dict, phonemes: PHONEME_DICT) -> dict:
     words = document_text.split(" ")
 
     counter = Counter(words)
-    for language, phoneme_list in phonemes.items():
-        phoneme_count = 0
-        found_phonemes = []
-        found_example_words = []
-        for phoneme in phoneme_list:
-            for example_word in phoneme.examples:
-                occurences = counter[example_word]
-                phoneme_count += occurences
-                if occurences > 0:
-                    found_phonemes.append(phoneme.name)
-                    found_example_words.append(example_word)
-        document[f"{language}_phoneme_count"] = phoneme_count
-        document[f"{language}_phonemes"] = found_phonemes
-        document[f"{language}_found_example_words"] = found_example_words
-        document[f"{language}_unique_phonemes"] = set(found_phonemes)
-        document[f"{language}_unique_phonemes_count"] = len(set(found_phonemes))
-
-    document["all_phoneme_count"] = (
-        document["da_phoneme_count"] + document["en_phoneme_count"]
-    )
-    document["all_phonemes"] = document["da_phonemes"] + document["en_phonemes"]
-    document["all_found_example_words"] = (
-        document["da_found_example_words"] + document["en_found_example_words"]
-    )
-    document["all_unique_phonemes"] = set(
-        document["da_unique_phonemes"] | document["en_unique_phonemes"]
-    )
-    document["all_unique_phonemes_count"] = len(document["all_unique_phonemes"])
+    phoneme_count = 0
+    found_phonemes = []
+    found_example_words = []
+    for phoneme in phonemes:
+        for example_word in phoneme.examples:
+            occurences = counter[example_word]
+            phoneme_count += occurences
+            if occurences > 0:
+                found_phonemes.append(phoneme.name)
+                found_example_words.append(example_word)
+    document["phoneme_count"] = phoneme_count
+    document["phonemes"] = found_phonemes
+    document["found_example_words"] = found_example_words
+    document["unique_phonemes"] = set(found_phonemes)
+    document["unique_phonemes_count"] = len(set(found_phonemes))
     return document
 
 
-def load_phonemes(cfg: DictConfig) -> PHONEME_DICT:
+def load_phonemes(cfg: DictConfig) -> PHONEME_LIST:
     """Load the phoneme list.
 
     Args:
@@ -214,7 +194,4 @@ def load_phonemes(cfg: DictConfig) -> PHONEME_DICT:
     """
     phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
     with phoneme_path.open() as f:
-        return {
-            language: [PhonemeInfo(**entry) for entry in phoneme_list]
-            for language, phoneme_list in json.load(f).items()
-        }
+        return [PhonemeInfo(**entry) for entry in json.load(f)]
