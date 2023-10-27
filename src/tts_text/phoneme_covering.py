@@ -171,41 +171,30 @@ def build_phoneme_covering_dataset(
         name: cfg.phoneme_covering.min_docs_per_phoneme for name in all_phone_names
     }
 
-    covering_set: list[str] = list()
-    for document in tqdm(sorted_dataset):
+    # Create phoneme covering set
+    dataset: list[str] = list()
+    for document in tqdm(sorted_dataset, desc="Building phoneme covering set"):
+        # If we have exhausted all the phonemes then stop
         if not all_phonemes:
             break
+
+        text = document["text"]
         document_phonemes = document["all_phonemes"]
+
+        # For each new phoneme found in the document, decrement the count of that
+        # phoneme in the set of all phonemes. If the count reaches zero then remove
+        # the phoneme from the set of all phonemes
         new_phonemes = set(all_phonemes.keys()).intersection(document_phonemes)
         for new_phoneme in new_phonemes:
             all_phonemes[new_phoneme] -= 1
             if all_phonemes[new_phoneme] == 0:
                 all_phonemes.pop(new_phoneme)
+
+        # If new phonemes were found then include the document in the dataset
         if new_phonemes:
-            covering_set.append(document)
+            dataset.append(text)
 
-    covering_set_dataset = Dataset.from_list(covering_set)
-
-    def extract_paragraph_with_example_word(document: dict) -> dict:
-        found_paragraphs = []
-        for paragraph in re.split(
-            "|".join(cfg.split_strings),
-            document["text"],
-        ):
-            if any(
-                word in document["all_found_example_words"]
-                for word in paragraph.split()
-            ):
-                found_paragraphs.append(paragraph)
-
-        document["extracted_text"] = " ".join(found_paragraphs)
-        return document
-
-    covering_set_dataset = covering_set_dataset.map(
-        function=extract_paragraph_with_example_word,
-        desc="Extracting Wikipedia paragraphs with example words",
-    )
-    dataset = [document["extracted_text"] for document in covering_set_dataset]
+    # Save the dataset
     dataset_path = Path(output_dir) / "phoneme_covering_set.txt"
     with dataset_path.open("w") as f:
         f.write("\n".join(dataset))
