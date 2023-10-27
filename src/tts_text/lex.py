@@ -29,7 +29,7 @@ def build_lex_dataset(cfg: DictConfig) -> list[str]:
 
     # Save the dataset
     dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "lex.txt"
-    with dataset_path.open("w") as f:
+    with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 
     return dataset
