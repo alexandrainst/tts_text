@@ -10,8 +10,16 @@ from tqdm.auto import tqdm
 
 from datasets import load_dataset, Dataset
 from omegaconf import DictConfig
+import nltk
+from nltk.tokenize import sent_tokenize
+import itertools as it
+
 
 logger = logging.getLogger(__name__)
+
+
+# Download the sentence splitter model
+nltk.download("punkt", quiet=True)
 
 
 def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
@@ -36,12 +44,30 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
         beam_runner="DirectRunner",
     )
 
+    # Split dataset into sentences
+    desc = "Splitting sentences in the Wikipedia dataset"
+    dataset = Dataset.from_dict(
+        dict(
+            text=list(
+                it.chain(
+                    *[
+                        sent_tokenize(text=example, language="danish")
+                        for example in tqdm(iterable=dataset["text"], desc=desc)
+                    ]
+                )
+            )
+        )
+    )
+
     phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
     with phoneme_path.open() as f:
         phonemes = json.load(f)
 
     # Count phonemes in articles
-    dataset = dataset.map(partial(count_phoneme_occurences, phonemes=phonemes, cfg=cfg))
+    dataset = dataset.map(
+        function=partial(count_phoneme_occurences, phonemes=phonemes, cfg=cfg),
+        desc="Counting phonemes in the Wikipedia dataset",
+    )
     sort_by = cfg.phoneme_sort_strategy
     if sort_by == "da":
         dataset = dataset.sort("da_unique_phonemes_count", reverse=True)
@@ -162,7 +188,8 @@ def build_phoneme_covering_dataset(
         return document
 
     covering_set_dataset = covering_set_dataset.map(
-        extract_paragraph_with_example_word,
+        function=extract_paragraph_with_example_word,
+        desc="Extracting Wikipedia paragraphs with example words",
     )
     dataset = [document["extracted_text"] for document in covering_set_dataset]
     dataset_path = Path(output_dir) / "phoneme_covering_set.txt"
