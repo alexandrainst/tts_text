@@ -34,6 +34,9 @@ def filter_reddit_dataset(
     # Load the comments
     raw_dataset = load_dataset("alexandrainst/scandi-reddit", split="train")
     assert isinstance(raw_dataset, Dataset)
+
+    # Pick a subset of the dataset, to speed up filtering
+    raw_dataset = raw_dataset.select(range(start_index, start_index + (n * 1000)))
     filtered_dataset = raw_dataset.filter(
         lambda example: example["language"] == "da"
         and example["language_confidence"] > 0.95,
@@ -71,11 +74,9 @@ def filter_reddit_dataset(
         for sentence in dataset
         if re.search(r"https?://[^\s]+", sentence) is None
     ]
-    print(len(dataset))
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
     for index, sentence in enumerate(dataset[start_index : start_index + n]):
-        print(index)
         records = prompt_user(None, records, sentence, username, start_index, index)
 
     filtered_answers = pd.DataFrame.from_records(records)
@@ -85,12 +86,12 @@ def filter_reddit_dataset(
     if previous_answers_path.exists():
         previous_answers = pd.read_csv(previous_answers_path)
         if not previous_answers.equals(filtered_answers):
-            # Merge the previous answers with the new answers, but only the ones that
-            # have recieved a "y" answer from both annotators.
+            print("Previous answers found, merging with new answers.")
+            # Merge the previous answers with the new answers.
             concatenated_answers = pd.concat([previous_answers, filtered_answers])
             filtered_answers = concatenated_answers.groupby(
                 ["sentence", "index"], as_index=False, sort=False
-            ).agg({"username": ", ".join, "keep": lambda x: (x == "y").sum() == 2})
+            ).agg({"username": ", ".join, "keep": ", ".join})
 
     filtered_answers.to_csv(Path(output_dir) / "filtered_answers.csv", index=False)
 
