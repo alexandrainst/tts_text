@@ -2,12 +2,17 @@
 
 from copy import deepcopy
 from typing import Generator
+import time
 import random
 import itertools as it
+from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 import nltk
 from nltk.tokenize import sent_tokenize
 import re
+import requests as rq
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 # Download the sentence splitter model
@@ -117,3 +122,43 @@ def interleave_datasets(
         dataset.pop(sample_idx)
 
         yield sample
+
+
+def get_soup(url: str, dynamic: bool = False) -> BeautifulSoup:
+    """Get the soup of a URL.
+
+    Args:
+        url: The URL to get the soup of.
+        dynamic: Whether the page is dynamically loaded.
+
+    Returns:
+        The soup of the URL.
+    """
+    # Ensure that Chrome is installed
+    if dynamic:
+        options = Options()
+        options.add_argument("--headless")
+        driver = webdriver.Chrome(options=options)
+        driver.get(url=url)
+        html = driver.page_source
+    else:
+        response = rq.get(url=url)
+
+        # Retry if the request timed out
+        retries_left = 5
+        while response.status_code == 408:
+            time.sleep(1)
+            response = rq.get(url=url)
+            retries_left -= 1
+            if retries_left == 0:
+                raise TimeoutError("The request timed out.")
+
+        # Raise error if it was not successful
+        if not str(response.status_code).startswith("2"):
+            raise ConnectionError(
+                f"Could not get soup from {url}. Status code: {response.status_code}"
+            )
+
+        html = response.text
+
+    return BeautifulSoup(html, "html.parser")
