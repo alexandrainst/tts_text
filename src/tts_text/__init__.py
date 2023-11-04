@@ -16,10 +16,10 @@ __version__ = importlib.metadata.version(__package__)
 
 
 ALL_DATASET_BUILDERS: dict[str, Callable[..., list[str]]] = dict(
-    sundhed_dk=build_sundhed_dk_dataset,
     bus_stops_and_stations=build_bus_stop_and_station_dataset,
     dates=build_date_dataset,
     times=build_time_dataset,
     lex=build_lex_dataset,
     phoneme_covering=build_phoneme_covering_dataset,
+    sundhed_dk=build_sundhed_dk_dataset,
 )
