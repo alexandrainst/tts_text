@@ -17,6 +17,12 @@ def build_lex_dataset(cfg: DictConfig) -> list[str]:
     Returns:
         A list of articles from Lex.dk.
     """
+    # Load dataset if it already exists
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "lex.txt"
+    if dataset_path.exists():
+        with dataset_path.open("r", encoding="utf-8") as f:
+            return f.read().split("\n")
+
     # Load the articles
     raw_dataset = load_dataset("alexandrainst/lexdk-open", split="train")
     assert isinstance(raw_dataset, Dataset)
@@ -28,7 +34,6 @@ def build_lex_dataset(cfg: DictConfig) -> list[str]:
     )
 
     # Save the dataset
-    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "lex.txt"
     with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 
