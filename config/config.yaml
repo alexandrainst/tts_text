@@ -15,12 +15,12 @@ random_seed: 703
 sampling_probabilities:
   dates: 0.10
   times: 0.10
-  bus_stops_and_stations: 0.20
-  lex: 0.30
-  sundhed_dk: 0.30
+  lex: 0.40
+  sundhed_dk: 0.40
 
 include_entire_dataset:
   - phoneme_covering
+  - bus_stops_and_stations
 
 min_sentence_length: 30
 min_docs_per_phoneme: 30
