@@ -54,6 +54,7 @@ def main(cfg: DictConfig) -> None:
         sampling_probabilities=[
             cfg.sampling_probabilities[name] for name in sampling_datasets.keys()
         ],
+        random_seed=cfg.random_seed,
     )
 
     # Save the dataset
