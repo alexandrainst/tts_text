@@ -68,7 +68,7 @@ def build_sundhed_dk_dataset(cfg: DictConfig) -> list[str]:
     return dataset
 
 
-def extract_all_category_articles(url: str) -> list[str]:
+def extract_all_category_articles(url: str, parsed_urls: list[str] = []) -> list[str]:
     """Extract all articles from a category page.
 
     These pages have arbitrarily nested subcategories, so this function is called
@@ -76,6 +76,7 @@ def extract_all_category_articles(url: str) -> list[str]:
 
     Args:
         url: The URL of the category page.
+        parsed_urls: A list of URLs that have already been parsed.
 
     Returns:
         A list of articles from the category.
@@ -137,22 +138,30 @@ def extract_all_category_articles(url: str) -> list[str]:
                 if isinstance(soup.section, Tag)
                 else None
             )
-            content = (
-                normalize("NFKC", content_elt.text).strip()
-                if isinstance(content_elt, Tag)
-                else ""
-            )
+            content = content_elt.text if isinstance(content_elt, Tag) else ""
 
             article_str = f"{title}\n{author}\n\n{content}\n\n\nFakta:\n\n" + "\n".join(
                 facts
             )
+
+            # Clean the final article text
+            article_str = normalize("NFKC", article_str).replace("–", "-").strip()
+            article_str = re.sub(
+                r"[^a-zA-Z0-9æøåéÉÆØÅ.,\-?!:\n\/()\[\] ]%\"\'", "", article_str
+            )
+
             return [article_str]
 
     # If it wasn't and article then we recursively extract all articles from the
     # subcategories
     desc = f"Extracting articles from {url}"
     category_articles: list[str] = list()
+    parsed_urls.append(url)
     for subcategory_url in tqdm(subcategory_urls, desc=desc, leave=False):
-        subcategory_articles = extract_all_category_articles(url=subcategory_url)
+        if subcategory_url in parsed_urls:
+            continue
+        subcategory_articles = extract_all_category_articles(
+            url=subcategory_url, parsed_urls=parsed_urls
+        )
         category_articles.extend(subcategory_articles)
     return category_articles
