@@ -111,6 +111,7 @@ def filter_reddit_dataset(output_dir, username, num_samples, start_index):
         previous_filtering = pd.read_csv(previous_filtering_path)
         if not previous_filtering.equals(filtered_answers):
             logger.info("Previous filtering found, merging with new filtering.")
+
             # Merge the previous answers with the new answers.
             concatenated_answers = pd.concat([previous_filtering, filtered_answers])
             filtered_answers = concatenated_answers.groupby(
@@ -143,7 +144,7 @@ def prompt_user(
     """
     logger.info(f"Sentence {start_index + index}: {sentence}")
     if answer is None:
-        answer = input("Keep? [y/n]: ")
+        answer = input("Keep? [y/n] (Input 's' to skip): ")
 
     if answer in ["y", "n"]:
         records.append(
@@ -154,6 +155,9 @@ def prompt_user(
                 "index": start_index + index,
             }
         )
+    elif answer == "s":
+        logger.info("Skipping.")
+        return records
     else:
         logger.info("Invalid input, must be 'y' or 'n'.")
         answer = input("Keep? [y/n]: ")
