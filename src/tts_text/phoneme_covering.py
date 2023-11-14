@@ -29,12 +29,7 @@ def load_and_wiki_by_phoneme_occurence(cfg: DictConfig) -> Dataset:
     """
     # The `wiki40b` dataset is a small dataset so we can load it all into memory
     # instead of streaming it.
-    dataset = load_dataset(
-        "wiki40b",
-        "da",
-        split="train",
-        beam_runner="DirectRunner",
-    )
+    dataset = load_dataset("alexandrainst/wiki40b-da", split="train")
 
     phoneme_path = Path(cfg.dirs.data) / cfg.dirs.raw / cfg.dirs.phoneme_file
     with phoneme_path.open() as f:
