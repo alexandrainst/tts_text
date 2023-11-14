@@ -1,7 +1,6 @@
 """Building a list of reddit comments."""
 
-import pandas as pd
-from datasets import Dataset, load_dataset
+from datasets import load_dataset
 from pathlib import Path
 import nltk
 
@@ -18,23 +17,18 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     Returns:
         A list of reddit.com comments.
     """
-    # Load the manually filtered comments
-    filtered_comments_path = Path(output_dir) / "filtered_comments.csv"
-    if filtered_comments_path.exists():
-        filtered_comments_df = pd.read_csv(filtered_comments_path)
-        filtered_comments = Dataset.from_pandas(filtered_comments_df, split="train")
-    else:
-        try:
-            filtered_comments = load_dataset(
-                "alexandrainst/scandi-reddit-filtered",
-                split="train",
-            )
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                f"The filtered comments file was not found at {filtered_comments_path}"
-                "nor on huggingface.co. Please run the "
-                "manually_filter_reddit_comments.py script."
-            )
+    try:
+        filtered_comments = load_dataset(
+            "alexandrainst/scandi-reddit-filtered",
+            split="train",
+        )
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "The filtered comments file was not found on huggingface.co."
+            "In case the 'alexandrainst/scandi-reddit-filtered' dataset has been"
+            "deleted, you can recreate it by running the"
+            "manually_filter_reddit_comments.py script."
+        )
 
     # Take sentences from the filtered comments, which have all answers as "y"
     filtered_comments_text = [
