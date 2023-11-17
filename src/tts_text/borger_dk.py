@@ -60,7 +60,7 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
         # at a time, and only follow links downwards, otherwise the recursion will
         # never end. This is why we use the category variable.
         category = category_url.split("/")[-1]
-        category_articles, found_urls = extract_all_category_articles(
+        category_articles, found_urls = extract_all_articles(
             cfg=cfg, url=category_url, category=category, found_urls=found_urls
         )
         all_articles.extend(category_articles)
@@ -86,7 +86,7 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
     return dataset
 
 
-def extract_all_category_articles(
+def extract_all_articles(
     cfg: DictConfig, url: str, category: str, parsed_urls: list[str] = [], found_urls=[]
 ) -> tuple[list[str], list[str]]:
     """Extract all articles from a category page.
@@ -101,6 +101,9 @@ def extract_all_category_articles(
     Returns:
         A list of articles from the category.
     """
+    # The accumulator of the recursion
+    accumulated_articles: list[str] = list()
+
     # Often connection fails when we try to access a page, so we retry a few times
     # but we give up fairly fast due to time constraints.
     soup: BeautifulSoup = BeautifulSoup("")
@@ -112,43 +115,19 @@ def extract_all_category_articles(
     if not soup.contents:
         return [], found_urls
 
-    # Get links in collapsable sidebar
-    subcategory_urls: list[str] = []
+    # Get all good links in collapsable sidebar
+    urls_to_search: list[str] = []
     for collapsed_div in soup.find_all(name="div", class_="collapse"):
         if isinstance(collapsed_div, Tag):
-            # Find all the good links in the sidebar.
-            subcategory_urls.extend(
-                [
-                    BASE_URL + url_suffix.attrs["href"]
-                    for url_suffix in collapsed_div.find_all(
-                        name="a", class_="nav-link"
-                    )
-                    if (
-                        url_suffix.attrs is not None  # Its a link
-                        and category
-                        in url_suffix.attrs["href"]  # Only links to the same category
-                        and url_suffix.attrs["href"]
-                        not in url  # We are not going up in the hierarchy
-                        and not any(
-                            subsite in url_suffix.attrs["href"]
-                            for subsite in SUBSITES_TO_IGNORE
-                        )  # Alternative navigation hierarchies
-                        and BASE_URL
-                        not in url_suffix.attrs["href"]  # Links which contain
-                        # the base url are not articles, but are javascript-based
-                        # navigation or links to files hosted on borger.dk
-                        and BASE_URL + url_suffix.attrs["href"]
-                        not in found_urls  # We have not already found this link
-                    )
-                ]
+            urls_to_search.extend(
+                get_suitable_links(collapsed_div, category, url, found_urls)
             )
 
     # If there are no new subcategories, then we assume that the page has an article
     # and we extract it. Any article is accompanied by a link to another
     # article, so we open these and extract them as well
-    if not subcategory_urls:
-        subcategory_articles: list[str] = list()
-        articles_to_return: list[str] = list()
+    if not urls_to_search:
+        scraped_text_on_current_page: list[str] = list()
         for content_div in soup.find_all(name="div", class_="content-text"):
             # Extract the article
             article_str = ""
@@ -163,74 +142,95 @@ def extract_all_category_articles(
 
             # Some articles are only a link to another article, so we ignore them
             if article_str:
-                articles_to_return.append(article_str)
+                scraped_text_on_current_page.append(article_str)
 
             # Find all the good links to nested articles.
             for list_link in content_div.find_all(name="ul", class_="list--links"):
-                # TODO: make list comprehension into function
-                subcategory_urls.extend(
-                    [
-                        BASE_URL + url_suffix.attrs["href"]
-                        for url_suffix in list_link.find_all(name="a")
-                        if (
-                            url_suffix.attrs is not None  # Its a link
-                            and category
-                            in url_suffix.attrs[
-                                "href"
-                            ]  # Only links to the same category
-                            and url_suffix.attrs["href"]
-                            not in url  # We are not going up in the hierarchy
-                            and not any(
-                                subsite in url_suffix.attrs["href"]
-                                for subsite in SUBSITES_TO_IGNORE
-                            )  # Alternative navigation hierarchies
-                            and BASE_URL
-                            not in url_suffix.attrs["href"]  # Links which contain
-                            # the base url are not articles, but are javascript-based
-                            # navigation or links to files hosted on borger.dk
-                            and BASE_URL + url_suffix.attrs["href"]
-                            not in found_urls  # We have not already found this link
-                        )
-                    ]
+                urls_to_search.extend(
+                    get_suitable_links(list_link, category, url, found_urls)
                 )
 
-            # Follow the good links to nested articles
-            desc = f"Extracting articles from {url}"
-            parsed_urls.append(url)
-            found_urls.extend(subcategory_urls + [url])
-            for subcategory_url in tqdm(subcategory_urls, desc=desc, leave=False):
-                if subcategory_url in parsed_urls:
-                    continue
-                extracted_articles, found_urls = extract_all_category_articles(
-                    cfg=cfg,
-                    url=subcategory_url,
-                    category=category,
-                    parsed_urls=parsed_urls,
-                    found_urls=found_urls,
-                )
-                subcategory_articles.extend(extracted_articles)
+            accumulated_articles, found_urls = follow_links_and_extract_articles(
+                cfg=cfg,
+                category=category,
+                accumulated_articles=accumulated_articles,
+                top_url=url,
+                urls_to_search=urls_to_search,
+                parsed_urls=parsed_urls,
+                found_urls=found_urls,
+            )
 
         # We have now followed all the good links in the articles hence
-        # subcategory_articles should now only contain articles. We add
-        # these to the articles we have already found in this article
+        # accumulated_articles should now only contain text from the nested articles
+        # on the current page. We add these to the text we have already found on this
+        # page
+        return scraped_text_on_current_page + accumulated_articles, found_urls
 
-        return articles_to_return + subcategory_articles, found_urls
+    # Recursively follow links and extract articles
+    return follow_links_and_extract_articles(
+        cfg=cfg,
+        category=category,
+        accumulated_articles=accumulated_articles,
+        top_url=url,
+        urls_to_search=urls_to_search,
+        parsed_urls=parsed_urls,
+        found_urls=found_urls,
+    )
 
-    # If it wasn't and article then we recursively extract all articles from the
-    # subcategories
-    desc = f"Extracting articles from {url}"
-    category_articles: list[str] = list()
-    parsed_urls.append(url)
-    found_urls.extend(subcategory_urls + [url])
-    for subcategory_url in tqdm(subcategory_urls, desc=desc, leave=False):
-        if subcategory_url in parsed_urls:
+
+def follow_links_and_extract_articles(
+    cfg: DictConfig,
+    category: str,
+    accumulated_articles: list[str],
+    top_url: str,
+    urls_to_search: list[str],
+    parsed_urls: list[str],
+    found_urls: list[str],
+) -> tuple[list[str], list[str]]:
+    desc = f"Extracting articles from {top_url}"
+    parsed_urls.append(top_url)
+    found_urls.extend(urls_to_search + [top_url])
+    for url in tqdm(urls_to_search, desc=desc, leave=False):
+        if url in parsed_urls:
             continue
-        subcategory_articles, found_urls = extract_all_category_articles(
+        extracted_articles, found_urls = extract_all_articles(
             cfg=cfg,
-            url=subcategory_url,
+            url=url,
             category=category,
             parsed_urls=parsed_urls,
             found_urls=found_urls,
         )
-        category_articles.extend(subcategory_articles)
-    return category_articles, found_urls
+        accumulated_articles.extend(extracted_articles)
+    return accumulated_articles, found_urls
+
+
+def get_suitable_links(
+    list_link: Tag, category: str, url: str, found_urls: list[str]
+) -> list[str]:
+    """Get suitable links from a list of links.
+
+    Args:
+        list_link: The list of links.
+        category: The category of the links.
+
+    Returns:
+        A list of suitable links.
+    """
+    return [
+        BASE_URL + url_suffix.attrs["href"]
+        for url_suffix in list_link.find_all(name="a")
+        if (
+            url_suffix.attrs is not None  # Its a link
+            and category in url_suffix.attrs["href"]  # Only links to the same category
+            and url_suffix.attrs["href"]
+            not in url  # We are not going up in the hierarchy
+            and not any(
+                subsite in url_suffix.attrs["href"] for subsite in SUBSITES_TO_IGNORE
+            )  # Alternative navigation hierarchies
+            and BASE_URL not in url_suffix.attrs["href"]  # Links which contain
+            # the base url are not articles, but are javascript-based
+            # navigation or links to files hosted on borger.dk
+            and BASE_URL + url_suffix.attrs["href"]
+            not in found_urls  # We have not already found this link
+        )
+    ]
