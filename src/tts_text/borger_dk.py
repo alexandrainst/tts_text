@@ -1,4 +1,4 @@
-"""Scraping and preprocessing of the sundhed.dk text corpus."""
+"""Scraping and preprocessing of the borger.dk text corpus."""
 
 from pathlib import Path
 from unicodedata import normalize
@@ -19,16 +19,16 @@ SUBSITES_TO_IGNORE = [
 
 
 def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
-    """Build the sundhed.dk dataset.
+    """Build the borger.dk dataset.
 
     Args:
         cfg: The Hydra configuration object.
 
     Returns:
-        A list of articles from sundhed.dk.
+        A list of articles from borger.dk.
     """
     # Load dataset if it already exists
-    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "sundhed_dk.txt"
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "borger_dk.txt"
     if dataset_path.exists():
         with dataset_path.open("r", encoding="utf-8") as f:
             return f.read().split("\n")
@@ -51,7 +51,7 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
     # Extract all articles
     all_articles: list[str] = list()
     found_urls: list[str] = list()
-    desc = "Extracting articles from sundhed.dk"
+    desc = "Extracting articles from borger.dk"
     for category_url in tqdm(category_urls, desc=desc, leave=True):
         # Borger.dk is structured in to categories, which are structured in to
         # subcategories, which are structured in to articles. Every article contains
@@ -92,14 +92,22 @@ def extract_all_articles(
     """Extract all articles from a category page.
 
     These pages have arbitrarily nested subcategories, so this function is called
-    recursively.
+    recursively. Each recursion checks the sidebar for new subcategories, and if none
+    are found, then the page is assumed to contain an article. The article is
+    extracted, and the links in the article are followed and extracted as well.
+    The recursion ends when no new subcategories are found, and the articles are
+    either only text, or theirs links are not suitable for further recursion. See
+    `get_suitable_links` for the criteria for suitable links.
 
     Args:
-        url: The URL of the category page.
+        cfg: The Hydra configuration object.
+        category: The category of the page.
         parsed_urls: A list of URLs that have already been parsed.
+        found_urls: A list of URLs that have already been found, but not necessarily
+            parsed.
 
     Returns:
-        A list of articles from the category.
+        A list of articles, and an updated list of found URLs.
     """
     # The accumulator of the recursion
     accumulated_articles: list[str] = list()
@@ -187,6 +195,21 @@ def follow_links_and_extract_articles(
     parsed_urls: list[str],
     found_urls: list[str],
 ) -> tuple[list[str], list[str]]:
+    """Follow links and extract articles.
+
+    Args:
+        cfg: The Hydra configuration object.
+        category: The category of the page.
+        accumulated_articles: The articles that have already been accumulated.
+        top_url: The top URL.
+        urls_to_search: The URLs to search.
+        parsed_urls: The URLs that have already been parsed.
+        found_urls: The URLs that have already been found, but not necessarily
+            parsed.
+
+    Returns:
+        A tuple of the accumulated articles and the found URLs.
+    """
     desc = f"Extracting articles from {top_url}"
     parsed_urls.append(top_url)
     found_urls.extend(urls_to_search + [top_url])
@@ -209,9 +232,19 @@ def get_suitable_links(
 ) -> list[str]:
     """Get suitable links from a list of links.
 
+    Suitable links are links:
+        - to the same category
+        - that are not going up in the hierarchy
+        - that are not refering alternative navigation hierarchies
+        - that are not links to files hosted on borger.dk nor javascript-based
+            navigation links
+        - that have not already been found
     Args:
         list_link: The list of links.
         category: The category of the links.
+        url: The URL of the page where the list of links was found.
+        found_urls: The URLs that have already been found, but not necessarily
+            parsed.
 
     Returns:
         A list of suitable links.
