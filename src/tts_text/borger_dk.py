@@ -61,7 +61,7 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
         # never end. This is why we use the category variable.
         category = category_url.split("/")[-1]
         category_articles, found_urls = extract_all_category_articles(
-            url=category_url, category=category, found_urls=found_urls
+            cfg=cfg, url=category_url, category=category, found_urls=found_urls
         )
         all_articles.extend(category_articles)
 
@@ -87,7 +87,7 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
 
 
 def extract_all_category_articles(
-    url: str, category: str, parsed_urls: list[str] = [], found_urls=[]
+    cfg: DictConfig, url: str, category: str, parsed_urls: list[str] = [], found_urls=[]
 ) -> tuple[list[str], list[str]]:
     """Extract all articles from a category page.
 
@@ -101,16 +101,15 @@ def extract_all_category_articles(
     Returns:
         A list of articles from the category.
     """
-    # Often we receive no page when we try to access a page, so we retry a few times
+    # Often connection fails when we try to access a page, so we retry a few times
     # but we give up fairly fast due to time constraints.
     soup: BeautifulSoup = BeautifulSoup("")
-    # TODO: add to config
-    attempts_left = 5
-    while not soup.contents and attempts_left > 0:
+    for _ in range(cfg.scraping_retry_connection_limit):
         soup = get_soup(url=url, dynamic=True)
-        attempts_left -= 1
+        if soup.contents:
+            break
 
-    if attempts_left == 0:
+    if not soup.contents:
         return [], found_urls
 
     # Get links in collapsable sidebar
@@ -203,6 +202,7 @@ def extract_all_category_articles(
                 if subcategory_url in parsed_urls:
                     continue
                 extracted_articles, found_urls = extract_all_category_articles(
+                    cfg=cfg,
                     url=subcategory_url,
                     category=category,
                     parsed_urls=parsed_urls,
@@ -226,6 +226,7 @@ def extract_all_category_articles(
         if subcategory_url in parsed_urls:
             continue
         subcategory_articles, found_urls = extract_all_category_articles(
+            cfg=cfg,
             url=subcategory_url,
             category=category,
             parsed_urls=parsed_urls,
