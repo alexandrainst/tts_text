@@ -10,18 +10,14 @@ dirs:
   models: models
   phoneme_file: phonemes.json
 
-split_strings:
-  - \t
-  - \n
-  - _NEWLINE_
-  - _START_ARTICLE_
-  - _START_SECTION_
-  - _START_PARAGRAPH_
-
-phoneme_sort_strategy: da
 sampling_probabilities:
-  dates: 0.0625
-  times: 0.0625
-  bus_stops_and_stations: 0.125
-  lex: 0.375
-  phoneme_covering: 0.375
+  dates: 0.125
+  times: 0.125
+  bus_stops_and_stations: 0.25
+  lex: 0.5
+
+include_entire_dataset:
+  - phoneme_covering
+
+min_sentence_length: 30
+min_docs_per_phoneme: 30
