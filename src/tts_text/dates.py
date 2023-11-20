@@ -33,6 +33,12 @@ def build_date_dataset(cfg: DictConfig) -> list[str]:
     Returns:
         A list of strings representing dates in Danish.
     """
+    # Load dataset if it already exists
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "dates.txt"
+    if dataset_path.exists():
+        with dataset_path.open("r", encoding="utf-8") as f:
+            return f.read().split("\n")
+
     # Build the dataset
     dataset: list[str] = list()
     dataset.extend(
@@ -42,7 +48,6 @@ def build_date_dataset(cfg: DictConfig) -> list[str]:
     random.shuffle(dataset)
 
     # Save the dataset
-    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "dates.txt"
     with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 

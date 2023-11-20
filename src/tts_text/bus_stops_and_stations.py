@@ -15,6 +15,12 @@ def build_bus_stop_and_station_dataset(cfg: DictConfig) -> list[str]:
     Returns:
         A list of all bus stops and stations in Denmark.
     """
+    # Load dataset if it already exists
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "bus_stops_and_stations.txt"
+    if dataset_path.exists():
+        with dataset_path.open("r", encoding="utf-8") as f:
+            return f.read().split("\n")
+
     # Extract the table with all bus stops and stations from the website
     table = pd.read_html("https://danskejernbaner.dk/vis.stations.oversigt.php")[0]
 
@@ -28,7 +34,6 @@ def build_bus_stop_and_station_dataset(cfg: DictConfig) -> list[str]:
     )
 
     # Save the dataset
-    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "bus_stops_and_stations.txt"
     with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 

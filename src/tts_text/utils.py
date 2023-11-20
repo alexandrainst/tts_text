@@ -2,12 +2,22 @@
 
 from copy import deepcopy
 from typing import Generator
+import time
 import random
 import itertools as it
+from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 import nltk
 from nltk.tokenize import sent_tokenize
 import re
+import requests as rq
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException, WebDriverException
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 # Download the sentence splitter model
@@ -18,8 +28,10 @@ def extract_sentences(corpus: list[str], min_sentence_length: int) -> list[str]:
     """Extract sentences from a corpus of text.
 
     Args:
-        corpus: The corpus to extract sentences from.
-        min_sentence_length: The minimum length of a sentence.
+        corpus:
+            The corpus to extract sentences from.
+        min_sentence_length:
+            The minimum length of a sentence.
 
     Returns:
         The sentences in the corpus.
@@ -73,6 +85,7 @@ def interleave_datasets(
     non_sampling_datasets: list[list[str]],
     sampling_datasets: list[list[str]],
     sampling_probabilities: list[float],
+    random_seed: int,
 ) -> Generator[str, None, None]:
     """Interleave multiple datasets according to the given sampling probabilities.
 
@@ -84,11 +97,16 @@ def interleave_datasets(
             The datasets that should be sampled. These will be sampled according to
             the given sampling probabilities, after the non-sampling datasets have
             been included.
-        sampling_probabilities: The sampling probabilities for each dataset.
+        sampling_probabilities:
+            The sampling probabilities for each dataset.
+        random_seed:
+            The random seed to use.
 
     Yields:
         The interleaved dataset.
     """
+    random.seed(random_seed)
+
     # Start by including all datasets that shouldn't be sampled
     joined_non_sampling_datasets = list(it.chain(*non_sampling_datasets))
     random.shuffle(joined_non_sampling_datasets)
@@ -117,3 +135,51 @@ def interleave_datasets(
         dataset.pop(sample_idx)
 
         yield sample
+
+
+def get_soup(url: str, dynamic: bool = False) -> BeautifulSoup:
+    """Get the soup of a URL.
+
+    Args:
+        url:
+            The URL to get the soup of.
+        dynamic:
+            Whether the page is dynamically loaded.
+
+    Returns:
+        The soup of the URL.
+    """
+    if dynamic:
+        options = Options()
+        options.add_argument("--headless")
+        driver = webdriver.Chrome(options=options)
+        try:
+            driver.get(url=url)
+            html = driver.page_source
+        except TimeoutException:
+            logger.warning(f"Timed out while getting soup from {url}.")
+            html = ""
+        except WebDriverException:
+            logger.warning(f"Could not get soup from {url}.")
+            html = ""
+    else:
+        response = rq.get(url=url)
+
+        # Retry if the request timed out
+        retries_left = 5
+        while response.status_code == 408:
+            time.sleep(1)
+            response = rq.get(url=url)
+            retries_left -= 1
+            if retries_left == 0:
+                raise TimeoutError("The request timed out.")
+
+        # Raise error if it was not successful
+        if not str(response.status_code).startswith("2"):
+            raise ConnectionError(
+                f"Could not get soup from {url}. Status code: {response.status_code}"
+            )
+
+        html = response.text
+
+    return BeautifulSoup(html, "html.parser")
