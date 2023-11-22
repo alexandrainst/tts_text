@@ -239,7 +239,7 @@ def get_suitable_links(
     Suitable links are links:
         - to the same category
         - that are not going up in the hierarchy
-        - that are not refering alternative navigation hierarchies
+        - that are not referencing alternative navigation hierarchies
         - that are not links to files hosted on borger.dk nor javascript-based
             navigation links
         - that have not already been found
