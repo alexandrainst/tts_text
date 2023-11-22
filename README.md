@@ -7,7 +7,7 @@ ______________________________________________________________________
 [![Documentation](https://img.shields.io/badge/docs-passing-green)](https://alexandrainst.github.io/tts_text/tts_text.html)
 [![License](https://img.shields.io/github/license/alexandrainst/tts_text)](https://github.com/alexandrainst/tts_text/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/alexandrainst/tts_text)](https://github.com/alexandrainst/tts_text/commits/main)
-[![Code Coverage](https://img.shields.io/badge/Coverage-33%25-red.svg)](https://github.com/alexandrainst/tts_text/tree/main/tests)
+[![Code Coverage](https://img.shields.io/badge/Coverage-47%25-orange.svg)](https://github.com/alexandrainst/tts_text/tree/main/tests)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](https://github.com/alexandrainst/tts_text/blob/main/CODE_OF_CONDUCT.md)
 
 
