@@ -91,6 +91,7 @@ def filter_reddit_dataset(output_dir, username, num_samples, start_index):
         for sentence in dataset
         if re.search(r"https?://[^\s]+", sentence) is None
     ]
+    
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
     for index, sentence in enumerate(dataset[:num_samples]):
