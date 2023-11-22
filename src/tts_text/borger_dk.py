@@ -23,7 +23,8 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
     """Build the borger.dk dataset.
 
     Args:
-        cfg: The Hydra configuration object.
+        cfg:
+            The Hydra configuration object.
 
     Returns:
         A list of articles from borger.dk.
@@ -195,13 +196,20 @@ def follow_links_and_extract_articles(
     """Follow links and extract articles.
 
     Args:
-        cfg: The Hydra configuration object.
-        category: The category of the page.
-        accumulated_articles: The articles that have already been accumulated.
-        top_url: The top URL.
-        urls_to_search: The URLs to search.
-        parsed_urls: The URLs that have already been parsed.
-        found_urls: The URLs that have already been found, but not necessarily
+        cfg:
+            The Hydra configuration object.
+        category:
+            The category of the page.
+        accumulated_articles:
+            The articles that have already been accumulated.
+        top_url:
+            The top URL.
+        urls_to_search:
+            The URLs to search.
+        parsed_urls:
+            The URLs that have already been parsed.
+        found_urls:
+            The URLs that have already been found, but not necessarily
             parsed.
 
     Returns:
@@ -238,10 +246,14 @@ def get_suitable_links(
         - that have not already been found
 
     Args:
-        list_link: The list HTML element, containing the links.
-        category: The category of the links.
-        url: The URL of the page where the list of links was found.
-        found_urls: The URLs that have already been found, but not necessarily
+        list_link:
+            The list HTML element, containing the links.
+        category:
+            The category of the links.
+        url:
+            The URL of the page where the list of links was found.
+        found_urls:
+            The URLs that have already been found, but not necessarily
             parsed.
 
     Returns:
