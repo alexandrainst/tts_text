@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import json
 import re
 import logging
+import warnings
 from functools import partial
 from collections import Counter
 from pathlib import Path
@@ -140,13 +141,16 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
     )
 
     # Count phonemes in articles
-    dataset = Dataset.from_dict(dict(text=sentences))
-    dataset = dataset.map(
-        function=partial(count_phoneme_occurences, phonemes=load_phonemes(cfg=cfg)),
-        desc="Counting phonemes in the Wikipedia dataset",
-        num_proc=mp.cpu_count(),
-    )
-    dataset = dataset.sort("unique_phonemes_count", reverse=True)
+    # Ignore future warning about `promote` being superseeded by `mode="default`
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=FutureWarning)
+        dataset = Dataset.from_dict(dict(text=sentences))
+        dataset = dataset.map(
+            function=partial(count_phoneme_occurences, phonemes=load_phonemes(cfg=cfg)),
+            desc="Counting phonemes in the Wikipedia dataset",
+            num_proc=mp.cpu_count(),
+        )
+        dataset = dataset.sort("unique_phonemes_count", reverse=True)
 
     return dataset
 

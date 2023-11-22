@@ -8,6 +8,7 @@ from .bus_stops_and_stations import build_bus_stop_and_station_dataset
 from .dates import build_date_dataset
 from .times import build_time_dataset
 from .lex import build_lex_dataset
+from .reddit import build_reddit_dataset
 from .phoneme_covering import build_phoneme_covering_dataset
 from .sundhed_dk import build_sundhed_dk_dataset
 
@@ -20,6 +21,7 @@ ALL_DATASET_BUILDERS: dict[str, Callable[..., list[str]]] = dict(
     dates=build_date_dataset,
     times=build_time_dataset,
     lex=build_lex_dataset,
+    reddit=build_reddit_dataset,
     phoneme_covering=build_phoneme_covering_dataset,
     sundhed_dk=build_sundhed_dk_dataset,
 )

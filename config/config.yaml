@@ -21,6 +21,7 @@ sampling_probabilities:
 include_entire_dataset:
   - phoneme_covering
   - bus_stops_and_stations
+  - reddit
 
 min_sentence_length: 30
 min_docs_per_phoneme: 30
