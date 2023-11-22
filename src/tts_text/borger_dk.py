@@ -259,21 +259,23 @@ def get_suitable_links(
     Returns:
         A list of suitable links.
     """
-    return [
-        BASE_URL + url_suffix.attrs["href"]
-        for url_suffix in list_link.find_all(name="a")
-        if (
-            url_suffix.attrs is not None  # It's a link
-            and category in url_suffix.attrs["href"]  # Only links to the same category
-            and url_suffix.attrs["href"]
-            not in url  # We are not going up in the hierarchy
-            and not any(
-                subsite in url_suffix.attrs["href"] for subsite in SUBSITES_TO_IGNORE
-            )  # Alternative navigation hierarchies
-            and BASE_URL not in url_suffix.attrs["href"]  # Links which contain
-            # the base url are not articles, but are javascript-based
-            # navigation or links to files hosted on borger.dk
-            and BASE_URL + url_suffix.attrs["href"]
-            not in found_urls  # We have not already found this link
+    suitable_links: list[str] = list()
+    for url_suffix in list_link.find_all(name="a"):
+        is_a_link = url_suffix.attrs is not None
+        is_same_category = category in url_suffix.attrs["href"]
+        is_not_going_up_in_hierarchy = url_suffix.attrs["href"] not in url
+        is_not_alternative_navigation = not any(
+            subsite in url_suffix.attrs["href"] for subsite in SUBSITES_TO_IGNORE
         )
-    ]
+        is_not_file_or_javascript = BASE_URL not in url_suffix.attrs["href"]
+        is_not_already_found = BASE_URL + url_suffix.attrs["href"] not in found_urls
+        if (
+            is_a_link
+            and is_same_category
+            and is_not_going_up_in_hierarchy
+            and is_not_alternative_navigation
+            and is_not_file_or_javascript
+            and is_not_already_found
+        ):
+            suitable_links.append(BASE_URL + url_suffix.attrs["href"])
+    return suitable_links
