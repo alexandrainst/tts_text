@@ -244,7 +244,7 @@ def get_suitable_links(
             navigation links
         - that have not already been found
     Args:
-        list_link: The list of links.
+        list_link: The list HTML element, containing the links.
         category: The category of the links.
         url: The URL of the page where the list of links was found.
         found_urls: The URLs that have already been found, but not necessarily
