@@ -258,7 +258,7 @@ def get_suitable_links(
         BASE_URL + url_suffix.attrs["href"]
         for url_suffix in list_link.find_all(name="a")
         if (
-            url_suffix.attrs is not None  # Its a link
+            url_suffix.attrs is not None  # It's a link
             and category in url_suffix.attrs["href"]  # Only links to the same category
             and url_suffix.attrs["href"]
             not in url  # We are not going up in the hierarchy
