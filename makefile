@@ -121,7 +121,6 @@ setup-git:
 	fi
 	@poetry run pre-commit install
 
-
 add-repo-to-git:
 	@export GPG_TTY=$(tty)
 	@gpgconf --kill gpg-agent

@@ -3,6 +3,8 @@
 from pathlib import Path
 import random
 
+from omegaconf import DictConfig
+
 
 MINUTES = list(range(0, 60))
 HOURS = list(range(0, 24))
@@ -33,15 +35,21 @@ HOUR_STRINGS = [
 ]
 
 
-def build_time_dataset(output_dir: Path | str) -> list[str]:
+def build_time_dataset(cfg: DictConfig) -> list[str]:
     """Build the time dataset.
 
     Args:
-        output_dir: The directory to save the dataset to.
+        cfg: The Hydra configuration object.
 
     Returns:
         A list of strings representing times in Danish.
     """
+    # Load dataset if it already exists
+    dataset_path = Path(cfg.dirs.data) / cfg.dirs.raw / "times.txt"
+    if dataset_path.exists():
+        with dataset_path.open("r", encoding="utf-8") as f:
+            return f.read().split("\n")
+
     # Build the dataset
     dataset: list[str] = list()
     dataset.extend([f"{hour:02}:{minute:02}" for hour in HOURS for minute in MINUTES])
@@ -55,8 +63,7 @@ def build_time_dataset(output_dir: Path | str) -> list[str]:
     random.shuffle(dataset)
 
     # Save the dataset
-    dataset_path = Path(output_dir) / "times.txt"
-    with dataset_path.open("w") as f:
+    with dataset_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(dataset))
 
     return dataset
