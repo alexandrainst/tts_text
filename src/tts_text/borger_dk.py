@@ -243,6 +243,7 @@ def get_suitable_links(
         - that are not links to files hosted on borger.dk
         - that are not javascript-based navigation links
         - that have not already been found
+        
     Args:
         list_link: The list HTML element, containing the links.
         category: The category of the links.
