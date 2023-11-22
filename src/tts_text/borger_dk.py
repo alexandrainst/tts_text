@@ -126,7 +126,12 @@ def extract_all_articles(
     for collapsed_div in soup.find_all(name="div", class_="collapse"):
         if isinstance(collapsed_div, Tag):
             urls_to_search.extend(
-                get_suitable_links(collapsed_div, category, url, found_urls)
+                get_suitable_links(
+                    list_link=collapsed_div,
+                    category=category,
+                    url=url,
+                    found_urls=found_urls,
+                )
             )
 
     # If there are no new subcategories, then we assume that the page has an article
@@ -146,14 +151,20 @@ def extract_all_articles(
                 r"[^a-zA-Z0-9æøåéÉÆØÅ.,\-?!:\n\/()\[\] ]%\"\'", "", article_str
             )
 
-            # Some articles are only a link to another article, so we ignore them
+            # Some articles are only a link to another article, i.e. they contain
+            # no text. This results in emptry strings, which we ignore.
             if article_str:
                 scraped_text_on_current_page.append(article_str)
 
             # Find all the good links to nested articles.
             for list_link in content_div.find_all(name="ul", class_="list--links"):
                 urls_to_search.extend(
-                    get_suitable_links(list_link, category, url, found_urls)
+                    get_suitable_links(
+                        list_link=list_link,
+                        category=category,
+                        url=url,
+                        found_urls=found_urls,
+                    )
                 )
 
             accumulated_articles, found_urls = follow_links_and_extract_articles(
