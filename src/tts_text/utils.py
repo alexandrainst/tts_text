@@ -137,7 +137,9 @@ def interleave_datasets(
         yield sample
 
 
-def get_soup(url: str, dynamic: bool = False) -> BeautifulSoup:
+def get_soup(
+    url: str, dynamic: bool = False, retries: int | None = None
+) -> BeautifulSoup:
     """Get the soup of a URL.
 
     Args:
@@ -145,10 +147,16 @@ def get_soup(url: str, dynamic: bool = False) -> BeautifulSoup:
             The URL to get the soup of.
         dynamic:
             Whether the page is dynamically loaded.
+        retries:
+            The number of retries to perform if the request times out. None means
+            infinite retries.
 
     Returns:
         The soup of the URL.
     """
+    if not (retries is None or retries >= 0):
+        raise ValueError("Number of retries must be non-negative.")
+
     if dynamic:
         options = Options()
         options.add_argument("--headless")
@@ -182,4 +190,15 @@ def get_soup(url: str, dynamic: bool = False) -> BeautifulSoup:
 
         html = response.text
 
-    return BeautifulSoup(html, "html.parser")
+    soup: BeautifulSoup = BeautifulSoup("")
+    if retries is None:
+        while not soup.contents:
+            soup = BeautifulSoup(html, "html.parser")
+    elif retries > 0:
+        for _ in range(retries):
+            soup = get_soup(url=url, dynamic=True)
+            if soup.contents:
+                break
+    else:
+        soup = BeautifulSoup(html, "html.parser")
+    return soup

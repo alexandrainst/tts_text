@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from unicodedata import normalize
-from bs4 import Tag, BeautifulSoup
+from bs4 import Tag
 from omegaconf import DictConfig
 from tqdm.auto import tqdm
 from webdriver_manager.chrome import ChromeDriverManager
@@ -15,7 +15,7 @@ BASE_URL = "https://www.borger.dk"
 SUBSITES_TO_IGNORE = [
     # Its own special subsite, with a question-answer-type navigation, which leads
     # to articles on the main site
-    "/kampagnesider/",  
+    "/kampagnesider/",
 ]
 
 
@@ -39,10 +39,7 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
     ChromeDriverManager().install()
 
     # Get the overall categories from the front page
-    # retry if it fails
-    soup: BeautifulSoup = BeautifulSoup("")
-    while not soup.contents:
-        soup = get_soup(url=BASE_URL, dynamic=True)
+    soup = get_soup(url=BASE_URL, dynamic=True)
 
     category_urls = [
         BASE_URL + url_suffix.contents[1].attrs["href"]
@@ -101,13 +98,13 @@ def extract_all_articles(
     `get_suitable_links` for the criteria for suitable links.
 
     Args:
-        cfg: 
+        cfg:
             The Hydra configuration object.
-        category: 
+        category:
             The category of the page.
-        parsed_urls: 
+        parsed_urls:
             A list of URLs that have already been parsed.
-        found_urls: 
+        found_urls:
             A list of URLs that have already been found, but not necessarily parsed.
 
     Returns:
@@ -118,11 +115,7 @@ def extract_all_articles(
 
     # Often connection fails when we try to access a page, so we retry a few times
     # but we give up fairly fast due to time constraints.
-    soup: BeautifulSoup = BeautifulSoup("")
-    for _ in range(cfg.scraping_retry_connection_limit):
-        soup = get_soup(url=url, dynamic=True)
-        if soup.contents:
-            break
+    soup = get_soup(url=url, dynamic=True, retries=cfg.scraping_retry_connection_limit)
 
     if not soup.contents:
         return [], found_urls
@@ -243,7 +236,7 @@ def get_suitable_links(
         - that are not links to files hosted on borger.dk
         - that are not javascript-based navigation links
         - that have not already been found
-        
+
     Args:
         list_link: The list HTML element, containing the links.
         category: The category of the links.
