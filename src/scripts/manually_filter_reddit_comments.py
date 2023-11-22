@@ -91,7 +91,7 @@ def filter_reddit_dataset(output_dir, username, num_samples, start_index):
         for sentence in dataset
         if re.search(r"https?://[^\s]+", sentence) is None
     ]
-    
+
     # Manually filter the dataset, and store which person filtered each comment
     records: list[dict[str, str | int]] = list()
     for index, sentence in enumerate(dataset[:num_samples]):
@@ -161,7 +161,7 @@ def prompt_user(
         return records
     else:
         logger.info("Invalid input, must be 'y' or 'n'.")
-        answer = input("Keep? [y/n]: ")
+        answer = input("Keep? [y/n] (Input 's' to skip): ")
         records = prompt_user(
             answer=answer,
             records=records,
