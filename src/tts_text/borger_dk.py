@@ -101,11 +101,14 @@ def extract_all_articles(
     `get_suitable_links` for the criteria for suitable links.
 
     Args:
-        cfg: The Hydra configuration object.
-        category: The category of the page.
-        parsed_urls: A list of URLs that have already been parsed.
-        found_urls: A list of URLs that have already been found, but not necessarily
-            parsed.
+        cfg: 
+            The Hydra configuration object.
+        category: 
+            The category of the page.
+        parsed_urls: 
+            A list of URLs that have already been parsed.
+        found_urls: 
+            A list of URLs that have already been found, but not necessarily parsed.
 
     Returns:
         A list of articles, and an updated list of found URLs.
