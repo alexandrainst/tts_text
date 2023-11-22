@@ -4,9 +4,6 @@ from datasets import load_dataset
 from pathlib import Path
 import nltk
 
-# Download the sentence splitter model
-nltk.download("punkt", quiet=True)
-
 
 def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     """Build the reddit.com dataset.
