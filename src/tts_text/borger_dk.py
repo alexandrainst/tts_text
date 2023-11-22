@@ -240,8 +240,8 @@ def get_suitable_links(
         - to the same category
         - that are not going up in the hierarchy
         - that are not referencing alternative navigation hierarchies
-        - that are not links to files hosted on borger.dk nor javascript-based
-            navigation links
+        - that are not links to files hosted on borger.dk
+        - that are not javascript-based navigation links
         - that have not already been found
     Args:
         list_link: The list HTML element, containing the links.
