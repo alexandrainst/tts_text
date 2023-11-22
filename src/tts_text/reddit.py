@@ -34,7 +34,7 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
     filtered_comments_text = [
         comment["sentence"]
         for comment in filtered_comments
-        if all(answer == "y" for answer in comment["keep"].split(" ,"))
+        if all(answer == "y" for answer in comment["keep"].split(", "))
     ]
 
     dataset_path = Path(output_dir) / "reddit.txt"
