@@ -13,8 +13,9 @@ from .utils import extract_sentences, get_soup
 
 BASE_URL = "https://www.borger.dk"
 SUBSITES_TO_IGNORE = [
-    "/kampagnesider/",  # Its own special subsite, with a question-answer-type
-    # navigation, which leads to articles on the main site
+    # Its own special subsite, with a question-answer-type navigation, which leads
+    # to articles on the main site
+    "/kampagnesider/",  
 ]
 
 
