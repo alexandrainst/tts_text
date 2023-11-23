@@ -196,7 +196,7 @@ def get_soup(
             soup = BeautifulSoup(html, "html.parser")
     elif retries > 0:
         for _ in range(retries):
-            soup = get_soup(url=url, dynamic=True)
+            soup = BeautifulSoup(html, "html.parser")
             if soup.contents:
                 break
     else:
