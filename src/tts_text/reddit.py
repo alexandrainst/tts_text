@@ -34,7 +34,7 @@ def build_reddit_dataset(cfg: DictConfig) -> list[str]:
         if all(answer == "y" for answer in comment["keep"].split(", "))
     ]
     output_dir = Path(cfg.dirs.data) / cfg.dirs.raw
-    dataset_path = Path(output_dir) / "reddit.txt"
+    dataset_path = output_dir / "reddit.txt"
     with dataset_path.open("w") as f:
         f.write("\n".join(filtered_comments_text))
 
