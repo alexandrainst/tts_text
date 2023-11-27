@@ -24,4 +24,4 @@ include_entire_dataset:
 
 min_sentence_length: 30
 min_docs_per_phoneme: 30
-scraping_retry_connection_limit: 5
+scraping_retry_connection_limit: 20
