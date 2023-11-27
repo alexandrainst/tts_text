@@ -13,10 +13,11 @@ dirs:
 random_seed: 703
 
 sampling_probabilities:
-  dates: 0.10
-  times: 0.10
-  lex: 0.40
-  sundhed_dk: 0.40
+  dates: 0.05
+  times: 0.05
+  lex: 0.30
+  sundhed_dk: 0.30
+  borger_dk: 0.30
 
 include_entire_dataset:
   - phoneme_covering
