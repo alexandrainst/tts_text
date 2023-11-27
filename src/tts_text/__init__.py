@@ -11,6 +11,7 @@ from .lex import build_lex_dataset
 from .reddit import build_reddit_dataset
 from .phoneme_covering import build_phoneme_covering_dataset
 from .sundhed_dk import build_sundhed_dk_dataset
+from .borger_dk import build_borger_dk_dataset
 
 # Fetches the version of the package as defined in pyproject.toml
 __version__ = importlib.metadata.version(__package__)
@@ -24,4 +25,5 @@ ALL_DATASET_BUILDERS: dict[str, Callable[..., list[str]]] = dict(
     reddit=build_reddit_dataset,
     phoneme_covering=build_phoneme_covering_dataset,
     sundhed_dk=build_sundhed_dk_dataset,
+    build_borger_dk_dataset=build_borger_dk_dataset,
 )
