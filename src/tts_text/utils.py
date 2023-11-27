@@ -199,6 +199,8 @@ def get_soup(
             soup = BeautifulSoup(html, "html.parser")
             if soup.contents:
                 break
+        else:
+            raise RuntimeError(f"Could not parse the URL {url}.")
     else:
         soup = BeautifulSoup(html, "html.parser")
     return soup
