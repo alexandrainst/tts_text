@@ -2,14 +2,14 @@
 
 from datasets import load_dataset
 from pathlib import Path
-import nltk
+from omegaconf import DictConfig
 
 
-def build_reddit_dataset(output_dir: Path | str) -> list[str]:
+def build_reddit_dataset(cfg: DictConfig) -> list[str]:
     """Build the reddit.com dataset.
 
     Args:
-        output_dir: The directory to save the dataset to.
+        cfg: The Hydra configuration object.
 
     Returns:
         A list of reddit.com comments.
@@ -33,8 +33,8 @@ def build_reddit_dataset(output_dir: Path | str) -> list[str]:
         for comment in filtered_comments
         if all(answer == "y" for answer in comment["keep"].split(", "))
     ]
-
-    dataset_path = Path(output_dir) / "reddit.txt"
+    output_dir = Path(cfg.dirs.data) / cfg.dirs.raw
+    dataset_path = output_dir / "reddit.txt"
     with dataset_path.open("w") as f:
         f.write("\n".join(filtered_comments_text))
 
