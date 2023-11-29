@@ -38,7 +38,7 @@ With the project installed, you can build the dataset by running:
 python src/scripts/build_tts_dataset.py
 ```
 
-**NB:** Running the above script on a machine running MacOS may result in `urllib.error.URLError`-exception, in which case one should follow the steps described [here](https://stackoverflow.com/a/71553913).
+**NB:** Running the above script on a machine running MacOS may result in an `urllib.error.URLError`-exception being thrown, in which case one should follow the steps described [here](https://stackoverflow.com/a/71553913).
 
 ## Project structure
 ```
