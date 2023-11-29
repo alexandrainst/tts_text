@@ -22,6 +22,7 @@ def main(cfg: DictConfig) -> None:
 
     Raises:
         ValueError: If the sampling probabilities do not include all the datasets.
+        URLError: If the dataset due to SSL-certificate errors.
     """
     # Get the individual datasets
     datasets: dict[str, list[str]] = defaultdict()
