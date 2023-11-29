@@ -7,6 +7,7 @@ from collections import defaultdict
 from omegaconf import DictConfig
 from pathlib import Path
 import logging
+from urllib.error import URLError
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,15 @@ def main(cfg: DictConfig) -> None:
     # Get the individual datasets
     datasets: dict[str, list[str]] = defaultdict()
     for name, builder in ALL_DATASET_BUILDERS.items():
-        datasets[name] = builder(cfg=cfg)
+        try:
+            datasets[name] = builder(cfg=cfg)
+        except URLError as e:
+            e.reason = str(e.reason) + (
+                "\n\nIf you are on a machine running MacOS the above error may be "
+                "fixed by following the steps described in: "
+                "https://stackoverflow.com/a/71553913"
+            )
+            raise e
 
     # Ensure that the sampling probabilities include all the datasets
     datasets_in_config = set(cfg.sampling_probabilities.keys()).union(
