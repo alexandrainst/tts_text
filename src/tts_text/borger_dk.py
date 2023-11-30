@@ -254,6 +254,7 @@ def get_suitable_links(
         - that are not referencing alternative navigation hierarchies
         - that are not links to files hosted on borger.dk
         - that are not javascript-based navigation links
+        - that are not links to pages outside borger.dk
         - that have not already been found
 
     Args:
@@ -279,14 +280,26 @@ def get_suitable_links(
             subsite in url_suffix.attrs["href"] for subsite in SUBSITES_TO_IGNORE
         )
         is_not_file_or_javascript = BASE_URL not in url_suffix.attrs["href"]
+        is_not_going_outside_borger_dk = not (
+            url_suffix.attrs["href"].startswith("http")
+            and "borger.dk" not in url_suffix.attrs["href"]  # avoid http(s) distinction
+        )
         is_not_already_found = BASE_URL + url_suffix.attrs["href"] not in found_urls
+        is_http_link = url_suffix.attrs["href"].startswith(
+            "http"
+        ) and not url_suffix.attrs["href"].startswith("https")
         if (
             is_a_link
             and is_same_category
             and is_not_going_up_in_hierarchy
             and is_not_alternative_navigation
             and is_not_file_or_javascript
+            and is_not_going_outside_borger_dk
             and is_not_already_found
         ):
-            suitable_links.append(BASE_URL + url_suffix.attrs["href"])
+            # Some links are http links, which are not relative to the base URL
+            if is_http_link:
+                suitable_links.append(url_suffix.attrs["href"])
+            else:
+                suitable_links.append(BASE_URL + url_suffix.attrs["href"])
     return suitable_links
