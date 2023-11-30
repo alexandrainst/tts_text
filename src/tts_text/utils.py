@@ -157,19 +157,21 @@ def get_soup(
     if not (retries is None or retries >= 0):
         raise ValueError("Number of retries must be non-negative.")
 
+    html: str = ""
     if dynamic:
         options = Options()
         options.add_argument("--headless")
         driver = webdriver.Chrome(options=options)
-        try:
-            driver.get(url=url)
-            html = driver.page_source
-        except TimeoutException:
-            logger.warning(f"Timed out while getting soup from {url}.")
-            html = ""
-        except WebDriverException:
-            logger.warning(f"Could not get soup from {url}.")
-            html = ""
+        while not html:
+            try:
+                driver.get(url=url)
+                html = driver.page_source
+            except TimeoutException:
+                logger.warning(f"Timed out while getting soup from {url}.")
+                html = ""
+            except WebDriverException:
+                logger.warning(f"Could not get soup from {url}.")
+                html = ""
     else:
         response = rq.get(url=url)
 
@@ -189,6 +191,9 @@ def get_soup(
             )
 
         html = response.text
+
+    if not html:
+        return BeautifulSoup("")
 
     soup: BeautifulSoup = BeautifulSoup("")
     if retries is None:
