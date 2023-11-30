@@ -273,7 +273,7 @@ def get_suitable_links(
     """
     suitable_links: list[str] = list()
     for url_suffix in list_link.find_all(name="a"):
-        is_a_link = url_suffix.attrs is not None
+        is_a_link = url_suffix.attrs is not None and "href" in url_suffix.attrs
         is_same_category = category in url_suffix.attrs["href"]
         is_not_going_up_in_hierarchy = url_suffix.attrs["href"] not in url
         is_not_alternative_navigation = not any(
