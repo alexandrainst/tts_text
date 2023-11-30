@@ -286,7 +286,7 @@ def get_suitable_links(
         is_not_file_or_javascript = BASE_URL not in url_suffix.attrs["href"]
         is_not_going_outside_borger_dk = not (
             url_suffix.attrs["href"].startswith("http")
-            and "borger.dk" not in url_suffix.attrs["href"]  # avoid http(s) distinction
+            and "www.borger.dk" not in url_suffix.attrs["href"]
         )
         is_not_already_found = BASE_URL + url_suffix.attrs["href"] not in found_urls
         is_http_link = url_suffix.attrs["href"].startswith(
