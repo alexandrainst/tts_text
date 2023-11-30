@@ -162,7 +162,8 @@ def get_soup(
         options = Options()
         options.add_argument("--headless")
         driver = webdriver.Chrome(options=options)
-        while not html:
+        retries_left = 5
+        while retries_left > 0 and not html:
             try:
                 driver.get(url=url)
                 html = driver.page_source
@@ -172,6 +173,7 @@ def get_soup(
             except WebDriverException:
                 logger.warning(f"Could not get soup from {url}.")
                 html = ""
+            retries_left -= 1
     else:
         response = rq.get(url=url)
 
