@@ -25,5 +25,5 @@ ALL_DATASET_BUILDERS: dict[str, Callable[..., list[str]]] = dict(
     reddit=build_reddit_dataset,
     phoneme_covering=build_phoneme_covering_dataset,
     sundhed_dk=build_sundhed_dk_dataset,
-    build_borger_dk_dataset=build_borger_dk_dataset,
+    borger_dk=build_borger_dk_dataset,
 )
