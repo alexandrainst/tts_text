@@ -41,10 +41,19 @@ def build_date_dataset(cfg: DictConfig) -> list[str]:
 
     # Build the dataset
     dataset: list[str] = list()
-    dataset.extend(
-        [f"{day} {month} {year}" for day in DAYS for month in MONTHS for year in YEARS]
-    )
-    dataset.extend([f"{day} {month}" for day in DAYS for month in MONTHS])
+    for year in YEARS:
+        day = random.choice(DAYS)
+        month = random.choice(MONTHS)
+        dataset.append(f"{day} {month} {year}")
+    for month in MONTHS:
+        day = random.choice(DAYS)
+        year = random.choice(YEARS)
+        dataset.append(f"{day} {month} {year}")
+    for day in DAYS:
+        month = random.choice(MONTHS)
+        year = random.choice(YEARS)
+        dataset.append(f"{day} {month} {year}")
+    dataset = list(set(dataset))
     random.shuffle(dataset)
 
     # Save the dataset
