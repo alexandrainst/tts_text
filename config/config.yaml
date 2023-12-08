@@ -14,15 +14,15 @@ random_seed: 703
 
 sampling_probabilities:
   dates: 0.05
-  times: 0.05
-  lex: 0.30
-  sundhed_dk: 0.30
-  borger_dk: 0.30
+  lex: 0.35
+  sundhed_dk: 0.35
+  borger_dk: 0.25
 
 include_entire_dataset:
   - phoneme_covering
   - bus_stops_and_stations
   - reddit
+  - times
 
 min_sentence_length: 30
 min_docs_per_phoneme: 30
