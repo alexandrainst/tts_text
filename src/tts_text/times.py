@@ -50,16 +50,20 @@ def build_time_dataset(cfg: DictConfig) -> list[str]:
         with dataset_path.open("r", encoding="utf-8") as f:
             return f.read().split("\n")
 
+    random.seed(cfg.random_seed)
+
     # Build the dataset
     dataset: list[str] = list()
-    dataset.extend([f"{hour:02}:{minute:02}" for hour in HOURS for minute in MINUTES])
-    dataset.extend(
-        [
-            f"{hour_prefix} {hour_str}"
-            for hour_str in HOUR_STRINGS
-            for hour_prefix in HOUR_PREFIXES
-        ]
-    )
+    for hour in HOURS:
+        minute = random.choice(MINUTES)
+        dataset.append(f"{hour:02}:{minute:02}")
+    for minute in MINUTES:
+        hour = random.choice(HOURS)
+        dataset.append(f"{hour:02}:{minute:02}")
+    for hour_prefix in HOUR_PREFIXES:
+        hour_string = random.choice(HOUR_STRINGS)
+        dataset.append(f"{hour_prefix} {hour_string}")
+    dataset = list(set(dataset))
     random.shuffle(dataset)
 
     # Save the dataset
