@@ -4,6 +4,7 @@ from pathlib import Path
 from omegaconf import DictConfig
 import pandas as pd
 import re
+import random
 
 
 def build_bus_stop_and_station_dataset(cfg: DictConfig) -> list[str]:
@@ -32,6 +33,23 @@ def build_bus_stop_and_station_dataset(cfg: DictConfig) -> list[str]:
             for bus_stop_or_station in dataset
         }
     )
+
+    # Remove suffixes from a large portion of the names
+    suffix_regex = (
+        r"Station.*"
+        r"|Trinbræt.*"
+        r"|Holdeplads.*"
+        r"|Sidespor.*"
+        r"|Godsbanegård.*"
+        r"|Letbanestation.*"
+        r"|Billetsalgssted.*"
+    )
+    dataset = [
+        re.sub(suffix_regex, "", bus_stop_or_station).strip()
+        if random.random() < 0.9
+        else bus_stop_or_station
+        for bus_stop_or_station in dataset
+    ]
 
     # Save the dataset
     with dataset_path.open("w", encoding="utf-8") as f:
