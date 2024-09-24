@@ -23,7 +23,10 @@ def build_bus_stop_and_station_dataset(cfg: DictConfig) -> list[str]:
             return f.read().split("\n")
 
     # Extract the table with all bus stops and stations from the website
-    table = pd.read_html("https://danskejernbaner.dk/vis.stations.oversigt.php")[0]
+    table = pd.read_html(
+        io="https://danskejernbaner.dk/vis.stations.oversigt.php",
+        encoding="utf-8",
+    )[0]
 
     # Extract the list of bus stops and stations from the table, and clean them up
     dataset = table["Stationens navn"].tolist()
