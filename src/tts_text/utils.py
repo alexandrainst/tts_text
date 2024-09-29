@@ -175,13 +175,13 @@ def get_soup(
                 html = ""
             retries_left -= 1
     else:
-        response = rq.get(url=url)
+        response = rq.get(url=url, timeout=10)
 
         # Retry if the request timed out
         retries_left = 5
         while response.status_code == 408:
             time.sleep(1)
-            response = rq.get(url=url)
+            response = rq.get(url=url, timeout=10)
             retries_left -= 1
             if retries_left == 0:
                 raise TimeoutError("The request timed out.")
