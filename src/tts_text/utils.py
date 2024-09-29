@@ -14,6 +14,9 @@ import requests as rq
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
 import logging
 
 
@@ -138,7 +141,10 @@ def interleave_datasets(
 
 
 def get_soup(
-    url: str, dynamic: bool = False, retries: int | None = None
+    url: str,
+    dynamic: bool = False,
+    retries: int | None = None,
+    xpath_to_be_present: str | None = None,
 ) -> BeautifulSoup:
     """Get the soup of a URL.
 
@@ -150,6 +156,9 @@ def get_soup(
         retries:
             The number of retries to perform if the request times out. None means
             infinite retries.
+        xpath_to_be_present:
+            The xpath to wait for before returning the soup. If None, we will wait 5
+            seconds before returning the soup.
 
     Returns:
         The soup of the URL.
@@ -166,6 +175,15 @@ def get_soup(
         while retries_left > 0 and not html:
             try:
                 driver.get(url=url)
+                if xpath_to_be_present:
+                    wait = WebDriverWait(driver=driver, timeout=10)
+                    wait.until(
+                        method=EC.presence_of_element_located(
+                            locator=(By.XPATH, xpath_to_be_present)
+                        ),
+                    )
+                else:
+                    time.sleep(5)
                 html = driver.page_source
             except TimeoutException:
                 logger.warning(f"Timed out while getting soup from {url}.")

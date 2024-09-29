@@ -1,5 +1,6 @@
 """Scraping and preprocessing of the sundhed.dk text corpus."""
 
+from functools import partial
 from pathlib import Path
 from unicodedata import normalize
 from bs4 import Tag
@@ -8,6 +9,8 @@ from tqdm.auto import tqdm
 from webdriver_manager.chrome import ChromeDriverManager
 import logging
 import re
+from tqdm.contrib.concurrent import process_map
+import multiprocessing as mp
 from .utils import extract_sentences, get_soup
 
 
@@ -34,18 +37,24 @@ def build_sundhed_dk_dataset(cfg: DictConfig) -> list[str]:
     ChromeDriverManager().install()
 
     # Get the overall categories from the front page
-    soup = get_soup(url=BASE_URL + "/borger/patienthaandbogen/", dynamic=True)
+    soup = get_soup(
+        url=BASE_URL + "/borger/patienthaandbogen/",
+        dynamic=True,
+        xpath_to_be_present="//div[@class='main-content']",
+    )
     category_urls = [
         BASE_URL + url_suffix.a["href"]
         for url_suffix in soup.find_all("li", class_="list-group-item")
     ]
 
     # Extract all articles
-    all_articles: list[str] = list()
-    desc = "Extracting articles from sundhed.dk"
-    for category_url in tqdm(category_urls, desc=desc, leave=True):
-        category_articles = extract_all_category_articles(url=category_url)
-        all_articles.extend(category_articles)
+    all_articles = [
+        article
+        for category_url in tqdm(category_urls, desc="Extracting articles")
+        for article in extract_all_category_articles(
+            url=category_url, parsed_urls=list(), num_workers=mp.cpu_count()
+        )
+    ]
 
     # Split the articles into sentences
     dataset = extract_sentences(
@@ -68,21 +77,29 @@ def build_sundhed_dk_dataset(cfg: DictConfig) -> list[str]:
     return dataset
 
 
-def extract_all_category_articles(url: str, parsed_urls: list[str] = []) -> list[str]:
+def extract_all_category_articles(
+    url: str, parsed_urls: list[str], num_workers: int
+) -> list[str]:
     """Extract all articles from a category page.
 
     These pages have arbitrarily nested subcategories, so this function is called
     recursively.
 
     Args:
-        url: The URL of the category page.
-        parsed_urls: A list of URLs that have already been parsed.
+        url:
+            The URL of the category page.
+        parsed_urls:
+            A list of URLs that have already been parsed.
+        num_workers:
+            The number of workers to use for parallel processing.
 
     Returns:
         A list of articles from the category.
     """
     # Parse the URL
-    soup = get_soup(url=url, dynamic=True)
+    soup = get_soup(
+        url=url, dynamic=True, xpath_to_be_present="//div[@class='main-content']"
+    )
 
     # Try to get the URLs of the subcategories, if any
     subcategory_urls = [
@@ -152,16 +169,33 @@ def extract_all_category_articles(url: str, parsed_urls: list[str] = []) -> list
 
             return [article_str]
 
-    # If it wasn't and article then we recursively extract all articles from the
+    # If it wasn't an article then we recursively extract all articles from the
     # subcategories
     desc = f"Extracting articles from {url}"
-    category_articles: list[str] = list()
     parsed_urls.append(url)
-    for subcategory_url in tqdm(subcategory_urls, desc=desc, leave=False):
-        if subcategory_url in parsed_urls:
-            continue
-        subcategory_articles = extract_all_category_articles(
-            url=subcategory_url, parsed_urls=parsed_urls
+    subcategory_urls = [url for url in subcategory_urls if url not in parsed_urls]
+    if num_workers > 1:
+        subcategory_articles = process_map(
+            partial(
+                extract_all_category_articles,
+                parsed_urls=parsed_urls,
+                num_workers=1,
+            ),
+            subcategory_urls,
+            max_workers=min(num_workers, len(subcategory_urls)),
+            desc=desc,
+            leave=False,
+            position=1,
         )
-        category_articles.extend(subcategory_articles)
-    return category_articles
+    else:
+        subcategory_articles = [
+            extract_all_category_articles(
+                url=url, parsed_urls=parsed_urls, num_workers=1
+            )
+            for url in subcategory_urls
+        ]
+    return [
+        article
+        for subcategory_article in subcategory_articles
+        for article in subcategory_article
+    ]
