@@ -5,8 +5,6 @@ from unicodedata import normalize
 from bs4 import Tag
 from omegaconf import DictConfig
 from tqdm.auto import tqdm
-from webdriver_manager.chrome import ChromeDriverManager
-import logging
 import re
 from .utils import extract_sentences, get_soup
 
@@ -34,10 +32,6 @@ def build_borger_dk_dataset(cfg: DictConfig) -> list[str]:
     if dataset_path.exists():
         with dataset_path.open("r", encoding="utf-8") as f:
             return f.read().split("\n")
-
-    # Install the Chrome driver, if it isn't already installed
-    logging.getLogger("WDM").setLevel(logging.WARNING)
-    ChromeDriverManager().install()
 
     # Get the overall categories from the front page
     soup = get_soup(url=BASE_URL, dynamic=True)

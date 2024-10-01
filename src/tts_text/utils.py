@@ -12,7 +12,6 @@ from nltk.tokenize import sent_tokenize
 import re
 import requests as rq
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -168,8 +167,24 @@ def get_soup(
 
     html: str = ""
     if dynamic:
-        options = Options()
-        options.add_argument("--headless")
+        options = webdriver.ChromeOptions()
+        chrome_arguments = [
+            "--no-sandbox",
+            "--remote-debugging-port=9222",
+            "--remote-debugging-pipe",
+            "--autoplay-policy=no-user-gesture-required",
+            "--no-first-run",
+            "--disable-gpu",
+            "--use-fake-ui-for-media-stream",
+            "--use-fake-device-for-media-stream",
+            "--disable-sync",
+            "--disable-dev-shm-usage",
+            "--start-maximized",
+            "--headless=new",
+        ]
+        for argument in chrome_arguments:
+            options.add_argument(argument=argument)
+
         driver = webdriver.Chrome(options=options)
         retries_left = 5
         while retries_left > 0 and not html:
