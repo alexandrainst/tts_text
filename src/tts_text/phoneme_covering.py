@@ -148,7 +148,7 @@ def load_and_sort_wikipedia_dataset(cfg: DictConfig) -> Dataset:
         dataset = dataset.map(
             function=partial(count_phoneme_occurences, phonemes=load_phonemes(cfg=cfg)),
             desc="Counting phonemes in the Wikipedia dataset",
-            num_proc=mp.cpu_count(),
+            num_proc=mp.cpu_count() - 1,
         )
         dataset = dataset.sort("unique_phonemes_count", reverse=True)
 

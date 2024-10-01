@@ -52,7 +52,7 @@ def build_sundhed_dk_dataset(cfg: DictConfig) -> list[str]:
         article
         for category_url in tqdm(category_urls, desc="Extracting articles")
         for article in extract_all_category_articles(
-            url=category_url, parsed_urls=list(), num_workers=mp.cpu_count()
+            url=category_url, parsed_urls=list(), num_workers=mp.cpu_count() - 1
         )
     ]
 
